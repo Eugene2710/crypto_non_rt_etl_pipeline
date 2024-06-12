@@ -4,14 +4,19 @@ version = "0.1.0"
 description = "quicknode playground for calling quicknode APIs"
 authors = ["eugeneleejunping <eugeneleejunping@gmail.com>"]
 readme = "README.md"
+packages = [
+    {include = "src"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 requests = "^2.32.3"
+
+[tool.poetry.dev-dependencies]
 ruff = "^0.4.8"
 black = "^24.4.2"
 mypy = "1.10.0"
-
+pytest = "^8.2.2"
 
 [build-system]
 requires = ["poetry-core"]
