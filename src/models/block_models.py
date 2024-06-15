@@ -16,14 +16,16 @@ class Withdrawal(BaseModel):
 
 
 class Transaction(BaseModel):
-    accessList: list[AccessListItem] | None = None
+    accessList: list[AccessListItem] | None = (
+        None  # make access list into a separate table
+    )
     blockHash: str
     blockNumber: str
     chainId: str | None = None
     from_: str = Field(..., alias="from")
     gas: str
     gasPrice: str
-    hash: str
+    hash: str  # id
     input: str
     maxFeePerGas: str | None = None
     maxPriorityFeePerGas: str | None = None
@@ -53,7 +55,19 @@ class Transaction(BaseModel):
             return Transaction.model_validate({**input})
 
 
-class BlockInformationResult(BaseModel):
+"""
+quick_node.block_table
+
+sqlalchemy.Table(
+    sqlalchemy.Column(baseFeePerGas, String)
+)
+
+"""
+
+
+class BlockInformationResult(
+    BaseModel
+):  # create a block table -> foreign key constraint to transaction table
     baseFeePerGas: str
     blobGasUsed: str
     difficulty: str
@@ -75,7 +89,7 @@ class BlockInformationResult(BaseModel):
     stateRoot: str
     timestamp: str
     totalDifficulty: str
-    transactions: list[Transaction]
+    transactions: list[Transaction]  # create a transaction table
     transactionsRoot: str
     uncles: list[str]
     withdrawals: list[Withdrawal]
