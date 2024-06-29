@@ -5,13 +5,15 @@ import json
 import os
 from pprint import pformat
 
-from src.models.block_models import BlockInformationResponse
+from src.models.quick_node_models.eth_blocks import (
+    QuickNodeEthBlockInformationResponse,
+)
 from src.quick_node.get_latest_block import get_latest_block_number
 
 load_dotenv()
 
 
-def get_block_information(block_number: str) -> BlockInformationResponse:
+def get_block_information(block_number: str) -> QuickNodeEthBlockInformationResponse:
     url: str = os.getenv("QUICK_NODE_URL")
     payload: str = json.dumps(
         {
@@ -31,16 +33,16 @@ def get_block_information(block_number: str) -> BlockInformationResponse:
     with open("response.json", mode="w") as file:
         file.write(pformat(response_dict))
 
-    response_model: BlockInformationResponse = BlockInformationResponse.from_json(
-        response_dict
+    response_model: QuickNodeEthBlockInformationResponse = (
+        QuickNodeEthBlockInformationResponse.from_json(response_dict)
     )
     return response_model
 
 
 if __name__ == "__main__":
     latest_block: str = get_latest_block_number()
-    latest_block_information: BlockInformationResponse = get_block_information(
-        latest_block
+    latest_block_information: QuickNodeEthBlockInformationResponse = (
+        get_block_information(latest_block)
     )
     print(f"latest_block_information for {latest_block}")
     print(pformat(latest_block_information))
