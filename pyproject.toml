@@ -16,6 +16,7 @@ pydantic = "^2.7.4"
 sqlalchemy = "2.0.30"
 alembic = "1.13.1"
 psycopg2-binary = "^2.9.9"
+aiohttp = "^3.9.5"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.4.8"
