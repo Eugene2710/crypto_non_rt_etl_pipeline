@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "quick-node-playground"
+name = "crypto-non-rt-etl-pipeline"
 version = "0.1.0"
-description = "quicknode playground for calling quicknode APIs"
+description = "Non Real-Time ETL pipeline to extract, load and transform crypto data from QuickNode"
 authors = ["eugeneleejunping <eugeneleejunping@gmail.com>"]
 readme = "README.md"
 packages = [
