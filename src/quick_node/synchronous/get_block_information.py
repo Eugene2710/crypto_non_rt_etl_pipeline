@@ -8,7 +8,7 @@ from pprint import pformat
 from src.models.quick_node_models.eth_blocks import (
     QuickNodeEthBlockInformationResponse,
 )
-from src.quick_node.get_latest_block import get_latest_block_number
+from src.quick_node.synchronous.get_latest_block import get_latest_block_number
 
 load_dotenv()
 
