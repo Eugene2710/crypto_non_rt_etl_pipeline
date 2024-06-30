@@ -22,17 +22,17 @@ Base = declarative_base()
 metadata: MetaData = MetaData()
 
 # data class: EthBlockDTO
-eth_block_table: Table = Table(
+eth_block_table = Table(
     "eth_blocks",
     metadata,
     Column(
-        "id", String, primary_key=True
+        "id", Integer, primary_key=True
     ),  # this id is from quick node; don't generate this
     Column("jsonrpc", String, nullable=False),
-    Column("baseFeePerGas", String, nullable=False),
-    Column("blobGasUsed", String, nullable=False),
+    Column("baseFeePerGas", String, nullable=True),
+    Column("blobGasUsed", String, nullable=True),
     Column("difficulty", String, nullable=False),
-    Column("excessBlobGas", String, nullable=False),
+    Column("excessBlobGas", String, nullable=True),
     Column("extraData", String, nullable=False),
     Column("gasLimit", String, nullable=False),
     Column("gasUsed", String, nullable=False),
@@ -42,7 +42,7 @@ eth_block_table: Table = Table(
     Column("mixHash", String, nullable=False),
     Column("nonce", String, nullable=False),
     Column("number", String, nullable=False),
-    Column("parentBeaconBlockRoot", String, nullable=False),
+    Column("parentBeaconBlockRoot", String, nullable=True),
     Column("parentHash", String, nullable=False),
     Column("receiptsRoot", String, nullable=False),
     Column("sha3Uncles", String, nullable=False),
@@ -51,7 +51,7 @@ eth_block_table: Table = Table(
     Column("timestamp", String, nullable=False),
     Column("totalDifficulty", String, nullable=False),
     Column("transactionsRoot", String, nullable=False),
-    Column("withdrawalsRoot", String, nullable=False),
+    Column("withdrawalsRoot", String, nullable=True),
     Column("created_at", DateTime, nullable=False),  # date you insert the row
 )
 
@@ -64,7 +64,7 @@ eth_transaction_table: Table = Table(
     Column("hash", String, primary_key=True),  # transaction hash from quicknode
     Column(
         "block_id",
-        String,
+        Integer,
         ForeignKey("eth_blocks.id", name="transactions_to_blocks_fk"),
         nullable=False,
     ),  # this id is from quick node; don't generate this
@@ -119,7 +119,7 @@ eth_withdrawals_table: Table = Table(
     # generate a unique id with uuid.uuid4() -> this is our own id as they didn't provide it
     Column(
         "block_id",
-        String,
+        Integer,
         ForeignKey("eth_blocks.id", name="withdrawals_to_blocks_fk"),
         nullable=False,
     ),

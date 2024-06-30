@@ -20,7 +20,6 @@ from src.models.database_transfer_objects.eth_transaction_access_list import (
 )
 from src.models.database_transfer_objects.eth_withdrawals import EthWithdrawalDTO
 from src.models.quick_node_models.eth_blocks import QuickNodeEthBlockInformationResponse
-from src.quick_node.asynchronous.get_latest_block import get_latest_block_number
 
 
 class QuickNodeEthBlockETLPipeline:
@@ -71,14 +70,26 @@ class QuickNodeEthBlockETLPipeline:
             - If any fails, we rollback, and let next run fix it
         """
         # Step 1: Fetch latest ingested eth block_number from quick_node.eth_block_import_status
-        latest_import_status: EthBlockImportStatusDTO = (
+        latest_import_status: EthBlockImportStatusDTO | None = (
             await self._import_status_dao.read_latest_import_status()
         )
-        start_block_number: int = latest_import_status.block_number + 1
-        # Step 2: Fetch current latest block_number in quick node
-        end_block_number: int = await get_latest_block_number()
+        # if import status doesn't exist; first time ingesting
+        # default block_number to
+        if latest_import_status is None:
+            latest_import_status = EthBlockImportStatusDTO.create_import_status(
+                block_number=0
+            )
 
-        for start in range(start_block_number, end_block_number + 1, self._batch_size):
+        # TODO: temporarily make the ETL pipeline run for only block number 0 to 1 for testing (2 blocks)
+        # Remove this after testing
+        start_block_number: int = 0  # latest_import_status.block_number + 1
+        # Step 2: Fetch current latest block_number in quick node
+        end_block_number: str = "0x1"  # # await get_latest_block_number()
+        end_block_number_int: int = int(end_block_number[2:], 16)
+
+        for start in range(
+            start_block_number, end_block_number_int + 1, self._batch_size
+        ):
             # Step 3: Extract, and Load
             await self.run_for_batch(start, start + self._batch_size)
 
@@ -152,7 +163,7 @@ class QuickNodeEthBlockETLPipeline:
                 EthWithdrawalDTO.from_quick_node_withdrawal(
                     block_id=single_block.id, input=single_withdrawal
                 )
-                for single_withdrawal in single_block.result.single_withdrawal
+                for single_withdrawal in single_block.result.withdrawals
             ]
             transaction_dto_list: list[EthTransactionDTO] = []
             access_list_items_dto_list: list[EthTransactionAccessListDTO] = []
@@ -205,7 +216,7 @@ class QuickNodeEthBlockETLPipeline:
         """
         TODO: integration test this
         """
-        with self._engine.begin() as async_connection:
+        async with self._engine.begin() as async_connection:
             # fire inserts in order
             # insert block first; withdrawals, transactions has a foreign key constraint to block.id and can only be inserted after blocks are inserted
             await self._block_dao.insert_blocks(
@@ -242,3 +253,31 @@ class QuickNodeEthBlockETLPipeline:
             await self._import_status_dao.insert_import_status(
                 async_connection=async_connection, input=new_import_status
             )
+
+
+if __name__ == "__main__":
+    connection_string: str = os.getenv("PG_CONNECTION_STRING", "")
+    import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(
+        connection_string=connection_string
+    )
+    block_dao: EthBlockDAO = EthBlockDAO(connection_string=connection_string)
+    transaction_dao: EthTransactionDAO = EthTransactionDAO(
+        connection_string=connection_string
+    )
+    transaction_access_list_dao: EthTransactionAccessListDAO = (
+        EthTransactionAccessListDAO(connection_string=connection_string)
+    )
+    withdrawal_dao: EthWithdrawalDAO = EthWithdrawalDAO(
+        connection_string=connection_string
+    )
+    extractor: QuickNodeBlockExtractor = QuickNodeBlockExtractor()
+    etl_pipeline: QuickNodeEthBlockETLPipeline = QuickNodeEthBlockETLPipeline(
+        import_status_dao=import_status_dao,
+        block_dao=block_dao,
+        transaction_dao=transaction_dao,
+        transaction_access_list_dao=transaction_access_list_dao,
+        withdrawal_dao=withdrawal_dao,
+        extractor=extractor,
+        batch_size=100,
+    )
+    asyncio.run(etl_pipeline.run())

@@ -1,4 +1,5 @@
 import asyncio
+from pprint import pprint
 from typing import Any
 
 import aiohttp
@@ -11,7 +12,6 @@ from retry import retry
 from src.models.quick_node_models.eth_blocks import (
     QuickNodeEthBlockInformationResponse,
 )
-from src.quick_node.asynchronous.get_latest_block import get_latest_block_number
 from src.quick_node.exceptions.quick_node_client_error import QuickNodeClientError
 
 load_dotenv()
@@ -26,7 +26,7 @@ load_dotenv()
     jitter=(-0.01, 0.01),
 )
 async def get_block_information(
-    block_number: int,
+    block_number: str,
 ) -> QuickNodeEthBlockInformationResponse:
     url: str = os.getenv("QUICK_NODE_URL")
     payload: str = json.dumps(
@@ -49,6 +49,7 @@ async def get_block_information(
                     f"Received non-status code 200: {response.status}"
                 )
 
+    pprint(response_dict)
     response_model: QuickNodeEthBlockInformationResponse = (
         QuickNodeEthBlockInformationResponse.from_json(response_dict)
     )
@@ -57,8 +58,11 @@ async def get_block_information(
 
 if __name__ == "__main__":
     event_loop: asyncio.AbstractEventLoop = asyncio.new_event_loop()
-    block_number: int = event_loop.run_until_complete(get_latest_block_number())
-    block_information: QuickNodeEthBlockInformationResponse = (
-        event_loop.run_until_complete(get_block_information(block_number))
-    )
-    print(block_information)
+    for i in range(0, 100):
+        block_number: str = hex(
+            i
+        )  # event_loop.run_until_complete(get_latest_block_number())
+        block_information: QuickNodeEthBlockInformationResponse = (
+            event_loop.run_until_complete(get_block_information(block_number))
+        )
+        print(block_information)

@@ -1,5 +1,5 @@
 import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.models.quick_node_models.eth_blocks import QuickNodeEthTransaction
 
@@ -10,7 +10,7 @@ class EthTransactionDTO(BaseModel):
     """
 
     hash: str  # transaction hash, identifier
-    block_id: str
+    block_id: int
     blockHash: str | None = None
     blockNumber: str
     chainId: str | None = None
@@ -30,12 +30,11 @@ class EthTransactionDTO(BaseModel):
     value: str
     yParity: str | None = None
     created_at: datetime.datetime
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    class Config:
-        orm_mode = True
-
+    @staticmethod
     def from_quick_node_eth_transaction(
-        self, block_id: str, input: QuickNodeEthTransaction
+        block_id: int, input: QuickNodeEthTransaction
     ) -> "EthTransactionDTO":
         return EthTransactionDTO(
             hash=input.hash,
@@ -46,7 +45,7 @@ class EthTransactionDTO(BaseModel):
             from_address=input.from_,
             gas=input.gas,
             gasPrice=input.gasPrice,
-            input=self.input,
+            input=input.input,
             maxFeePerGas=input.maxFeePerGas,
             maxPriorityFeePerGas=input.maxPriorityFeePerGas,
             nonce=input.nonce,

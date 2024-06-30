@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import uuid
 import datetime
 
@@ -17,9 +17,7 @@ class EthWithdrawalDTO(BaseModel):
     index: str
     validatorIndex: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def from_quick_node_withdrawal(
         self, block_id: str, input: QuickNodeEthWithdrawal

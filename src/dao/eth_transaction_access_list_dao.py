@@ -81,20 +81,19 @@ class EthTransactionAccessListDAO:
         )
         insert_text_clause: TextClause = text(insert_block)
 
-        async with async_connection:
-            cursor_result: CursorResult = await async_connection.execute(
-                insert_text_clause,
-                [
-                    {
-                        "id": single_input.id,
-                        "transaction_hash": single_input.transaction_hash,
-                        "address": single_input.address,
-                        "storageKeys": single_input.storageKeys,
-                        "created_at": single_input.created_at,
-                    }
-                    for single_input in input
-                ],
-            )
+        cursor_result: CursorResult = await async_connection.execute(
+            insert_text_clause,
+            [
+                {
+                    "id": single_input.id,
+                    "transaction_hash": single_input.transaction_hash,
+                    "address": single_input.address,
+                    "storageKeys": single_input.storageKeys,
+                    "created_at": single_input.created_at,
+                }
+                for single_input in input
+            ],
+        )
         inserted_rows: Sequence[Row] = cursor_result.fetchall()
         if inserted_rows:
             return None

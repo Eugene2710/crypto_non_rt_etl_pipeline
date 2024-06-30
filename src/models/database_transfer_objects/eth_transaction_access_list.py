@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import uuid
 import datetime
 
@@ -15,9 +15,7 @@ class EthTransactionAccessListDTO(BaseModel):
     address: str
     storageKeys: list[str]
     created_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
     def from_quick_node_eth_access_list_item(

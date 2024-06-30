@@ -107,41 +107,40 @@ class EthBlockDAO:
         )
         insert_text_clause: TextClause = text(insert_block)
 
-        async with async_connection:
-            cursor_result: CursorResult = await async_connection.execute(
-                insert_text_clause,
-                [
-                    {
-                        "id": single_input.id,
-                        "jsonrpc": single_input.jsonrpc,
-                        "baseFeePerGas": single_input.baseFeePerGas,
-                        "blobGasUsed": single_input.blobGasUsed,
-                        "difficulty": single_input.difficulty,
-                        "excessBlobGas": single_input.excessBlobGas,
-                        "extraData": single_input.extraData,
-                        "gasLimit": single_input.gasLimit,
-                        "gasUsed": single_input.gasUsed,
-                        "hash": single_input.hash,
-                        "logsBloom": single_input.logsBloom,
-                        "miner": single_input.miner,
-                        "mixHash": single_input.mixHash,
-                        "nonce": single_input.nonce,
-                        "number": single_input.number,
-                        "parentBeaconBlockRoot": single_input.parentBeaconBlockRoot,
-                        "parentHash": single_input.parentHash,
-                        "receiptsRoot": single_input.receiptsRoot,
-                        "sha3Uncles": single_input.sha3Uncles,
-                        "size": single_input.size,
-                        "stateRoot": single_input.stateRoot,
-                        "timestamp": single_input.timestamp,
-                        "totalDifficulty": single_input.totalDifficulty,
-                        "transactionsRoot": single_input.transactionsRoot,
-                        "withdrawalsRoot": single_input.withdrawalsRoot,
-                        "created_at": single_input.created_at,
-                    }
-                    for single_input in input
-                ],
-            )
+        cursor_result: CursorResult = await async_connection.execute(
+            insert_text_clause,
+            [
+                {
+                    "id": single_input.id,
+                    "jsonrpc": single_input.jsonrpc,
+                    "baseFeePerGas": single_input.baseFeePerGas,
+                    "blobGasUsed": single_input.blobGasUsed,
+                    "difficulty": single_input.difficulty,
+                    "excessBlobGas": single_input.excessBlobGas,
+                    "extraData": single_input.extraData,
+                    "gasLimit": single_input.gasLimit,
+                    "gasUsed": single_input.gasUsed,
+                    "hash": single_input.hash,
+                    "logsBloom": single_input.logsBloom,
+                    "miner": single_input.miner,
+                    "mixHash": single_input.mixHash,
+                    "nonce": single_input.nonce,
+                    "number": single_input.number,
+                    "parentBeaconBlockRoot": single_input.parentBeaconBlockRoot,
+                    "parentHash": single_input.parentHash,
+                    "receiptsRoot": single_input.receiptsRoot,
+                    "sha3Uncles": single_input.sha3Uncles,
+                    "size": single_input.size,
+                    "stateRoot": single_input.stateRoot,
+                    "timestamp": single_input.timestamp,
+                    "totalDifficulty": single_input.totalDifficulty,
+                    "transactionsRoot": single_input.transactionsRoot,
+                    "withdrawalsRoot": single_input.withdrawalsRoot,
+                    "created_at": single_input.created_at,
+                }
+                for single_input in input
+            ],
+        )
         inserted_rows: Sequence[Row] = cursor_result.fetchall()
         if inserted_rows:
             return None

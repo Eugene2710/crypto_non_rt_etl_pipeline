@@ -103,36 +103,35 @@ class EthTransactionDAO:
         )
         insert_text_clause: TextClause = text(insert_transactions)
 
-        async with async_connection:
-            cursor_result: CursorResult = await async_connection.execute(
-                insert_text_clause,
-                [
-                    {
-                        "hash": single_input.hash,
-                        "block_id": single_input.block_id,
-                        "blockHash": single_input.blockHash,
-                        "blockNumber": single_input.blockNumber,
-                        "chainId": single_input.chainId,
-                        "from_address": single_input.from_address,
-                        "gas": single_input.gas,
-                        "gasPrice": single_input.gasPrice,
-                        "input": single_input.input,
-                        "maxFeePerGas": single_input.maxFeePerGas,
-                        "maxPriorityFeePerGas": single_input.maxPriorityFeePerGas,
-                        "nonce": single_input.nonce,
-                        "r": single_input.r,
-                        "s": single_input.s,
-                        "to_address": single_input.to_address,
-                        "transactionIndex": single_input.transactionIndex,
-                        "type": single_input.type,
-                        "v": single_input.v,
-                        "value": single_input.value,
-                        "yParity": single_input.yParity,
-                        "created_at": single_input.created_at,
-                    }
-                    for single_input in input
-                ],
-            )
+        cursor_result: CursorResult = await async_connection.execute(
+            insert_text_clause,
+            [
+                {
+                    "hash": single_input.hash,
+                    "block_id": single_input.block_id,
+                    "blockHash": single_input.blockHash,
+                    "blockNumber": single_input.blockNumber,
+                    "chainId": single_input.chainId,
+                    "from_address": single_input.from_address,
+                    "gas": single_input.gas,
+                    "gasPrice": single_input.gasPrice,
+                    "input": single_input.input,
+                    "maxFeePerGas": single_input.maxFeePerGas,
+                    "maxPriorityFeePerGas": single_input.maxPriorityFeePerGas,
+                    "nonce": single_input.nonce,
+                    "r": single_input.r,
+                    "s": single_input.s,
+                    "to_address": single_input.to_address,
+                    "transactionIndex": single_input.transactionIndex,
+                    "type": single_input.type,
+                    "v": single_input.v,
+                    "value": single_input.value,
+                    "yParity": single_input.yParity,
+                    "created_at": single_input.created_at,
+                }
+                for single_input in input
+            ],
+        )
         inserted_rows: Sequence[Row] = cursor_result.fetchall()
         if inserted_rows:
             return None

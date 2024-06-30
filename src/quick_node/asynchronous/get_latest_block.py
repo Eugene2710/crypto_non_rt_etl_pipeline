@@ -19,7 +19,7 @@ dotenv.load_dotenv()
     backoff=1.5,
     jitter=(-0.01, 0.01),
 )
-async def get_latest_block_number() -> int:
+async def get_latest_block_number() -> str:
     url = os.getenv("QUICK_NODE_URL")
     payload: str = json.dumps(
         {"method": "eth_blockNumber", "params": [], "id": 1, "jsonrpc": "2.0"}
@@ -39,7 +39,7 @@ async def get_latest_block_number() -> int:
                     f"Received non-status code 200: {response.status}"
                 )
 
-    latest_block_number: int = int(result["result"])
+    latest_block_number: str = result["result"]
     return latest_block_number
 
 

@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.models.quick_node_models.eth_transaction import QuickNodeEthTransaction
 from src.models.quick_node_models.eth_withdrawal import QuickNodeEthWithdrawal
@@ -16,20 +16,20 @@ class QuickNodeEthBlockInformationResult(
     We have to convert this to a BlockDTO, to be ready to be saved in the DB
     """
 
-    baseFeePerGas: str
-    blobGasUsed: str
+    baseFeePerGas: str | None = None
+    blobGasUsed: str | None = None
     difficulty: str
-    excessBlobGas: str
+    excessBlobGas: str | None = None
     extraData: str
     gasLimit: str
     gasUsed: str
-    hash: str | None  # can be nullable for unsealed block
+    hash: str | None = None  # can be nullable for unsealed block
     logsBloom: str
     miner: str
     mixHash: str
     nonce: str
     number: str
-    parentBeaconBlockRoot: str
+    parentBeaconBlockRoot: str | None = None
     parentHash: str
     receiptsRoot: str
     sha3Uncles: str
@@ -41,7 +41,8 @@ class QuickNodeEthBlockInformationResult(
     transactionsRoot: str
     uncles: list[str]
     withdrawals: list[QuickNodeEthWithdrawal]
-    withdrawalsRoot: str
+    withdrawalsRoot: str | None = None
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
     def from_json(input: dict[str, Any]) -> "QuickNodeEthBlockInformationResult":
@@ -52,10 +53,14 @@ class QuickNodeEthBlockInformationResult(
                     QuickNodeEthTransaction.from_json(single_transaction)
                     for single_transaction in input["transactions"]
                 ],
-                "withdrawals": [
-                    QuickNodeEthWithdrawal.model_validate(single_withdrawal)
-                    for single_withdrawal in input["withdrawals"]
-                ],
+                "withdrawals": (
+                    [
+                        QuickNodeEthWithdrawal.model_validate(single_withdrawal)
+                        for single_withdrawal in input.get["withdrawals"]
+                    ]
+                    if "withdrawals" in input
+                    else []
+                ),
             }
         )
 

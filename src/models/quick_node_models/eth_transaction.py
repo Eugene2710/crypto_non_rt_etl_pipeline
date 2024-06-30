@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from src.models.quick_node_models.eth_access_list_item import QuickNodeEthAccessListItem
 
@@ -28,6 +28,7 @@ class QuickNodeEthTransaction(BaseModel):
     v: str
     value: str
     yParity: str | None = None
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
     def from_json(input: dict[str, Any]) -> "QuickNodeEthTransaction":

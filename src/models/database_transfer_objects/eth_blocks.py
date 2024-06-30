@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from src.models.quick_node_models.eth_blocks import (
     QuickNodeEthBlockInformationResponse,
@@ -18,12 +18,12 @@ class EthBlockDTO(BaseModel):
     Table: quick_node.blocks
     """
 
-    id: str  # from QuickNodeEthBlockInformationResponse.id, don't generate this
+    id: int  # from QuickNodeEthBlockInformationResponse.id, don't generate this
     jsonrpc: str
-    baseFeePerGas: str
-    blobGasUsed: str
+    baseFeePerGas: str | None
+    blobGasUsed: str | None
     difficulty: str
-    excessBlobGas: str
+    excessBlobGas: str | None
     extraData: str
     gasLimit: str
     gasUsed: str
@@ -33,7 +33,7 @@ class EthBlockDTO(BaseModel):
     mixHash: str
     nonce: str
     number: str
-    parentBeaconBlockRoot: str
+    parentBeaconBlockRoot: str | None
     parentHash: str
     receiptsRoot: str
     sha3Uncles: str
@@ -42,11 +42,9 @@ class EthBlockDTO(BaseModel):
     timestamp: str
     totalDifficulty: str
     transactionsRoot: str
-    withdrawalsRoot: str
+    withdrawalsRoot: str | None
     created_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
     def from_quick_node_block_information_response(
@@ -61,7 +59,7 @@ class EthBlockDTO(BaseModel):
             baseFeePerGas=input.result.baseFeePerGas,
             blobGasUsed=input.result.blobGasUsed,
             difficulty=input.result.difficulty,
-            excessBlobGas=input.result.excessBlock,
+            excessBlobGas=input.result.excessBlobGas,
             extraData=input.result.extraData,
             gasLimit=input.result.gasLimit,
             gasUsed=input.result.gasUsed,

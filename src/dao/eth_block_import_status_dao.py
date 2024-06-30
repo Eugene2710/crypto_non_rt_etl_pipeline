@@ -70,15 +70,14 @@ class EthBlockImportStatusDAO:
         )
         insert_text_clause: TextClause = text(insert_import_status)
 
-        async with async_connection:
-            cursor_result: CursorResult = await async_connection.execute(
-                insert_text_clause,
-                {
-                    "id": input.id,
-                    "block_number": input.block_number,
-                    "created_at": input.created_at,
-                },
-            )
+        cursor_result: CursorResult = await async_connection.execute(
+            insert_text_clause,
+            {
+                "id": input.id,
+                "block_number": input.block_number,
+                "created_at": input.created_at,
+            },
+        )
         inserted_row: Row | None = cursor_result.fetchone()
 
         if inserted_row:
