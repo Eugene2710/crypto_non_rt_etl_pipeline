@@ -44,3 +44,13 @@ Finally, use alembic to create the tables
 alembic upgrade head
 ```
 
+## Running the data pipeline to extract and load ethereum block information from quick node, into postgres database
+
+Step 1: Populate .env file with environment variables
+
+Step 2: Run the pipeline
+
+```commandline
+export PYTHONPATH=.
+python src/quick_node_eth_block_etl_pipeline.py
+```
