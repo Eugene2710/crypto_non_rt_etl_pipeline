@@ -11,23 +11,24 @@ class EthWithdrawalDTO(BaseModel):
     """
 
     id: uuid.UUID
-    block_id: str
+    block_number: str
     address: str
     amount: str
     index: str
     validatorIndex: str
-    created_at: datetime
+    created_at: datetime.datetime
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+    @staticmethod
     def from_quick_node_withdrawal(
-        self, block_id: str, input: QuickNodeEthWithdrawal
+        block_number: str, input: QuickNodeEthWithdrawal
     ) -> "EthWithdrawalDTO":
         return EthWithdrawalDTO(
             id=uuid.uuid4(),
-            block_id=block_id,
+            block_number=block_number,
             address=input.address,
             amount=input.amount,
             index=input.index,
             validatorIndex=input.validatorIndex,
-            created_at=datetime.datetime.now(datetime.UTC),
+            created_at=datetime.datetime.utcnow(),
         )

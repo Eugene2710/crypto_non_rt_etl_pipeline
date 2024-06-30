@@ -33,10 +33,10 @@ class EthBlockDAO:
     )
     async def read_block_by_id(self, block_id: str) -> EthBlockDTO | None:
         query_block_by_id: str = (
-            "SELECT id, jsonrpc, baseFeePerGas, blobGasUsed, difficulty, excessBlobGas, "
-            "extraData, gasLimit, gasUsed, hash, logsBloom, miner, mixHash, nonce, number, "
-            "parentBeaconBlockRoot, parentHash, receiptsRoot, sha3Uncles, size, stateRoot, "
-            "timestamp, totalDifficulty, transactionsRoot, withdrawalsRoot, created_at "
+            "SELECT block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
+            "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
+            "parentbeaconblockroot, parenthash, receiptsroot, sha3uncles, size, stateroot, "
+            "timestamp, totaldifficulty, transactionsroot, withdrawalsroot, created_at "
             "FROM eth_blocks WHERE id = :id limit 1"
         )
         query_text_clause: TextClause = text(query_block_by_id)
@@ -74,7 +74,7 @@ class EthBlockDAO:
                 stateRoot=single_row[20],
                 timestamp=single_row[21],
                 totalDifficulty=single_row[22],
-                transactionRoot=single_row[23],
+                transactionsRoot=single_row[23],
                 withdrawalsRoot=single_row[24],
                 created_at=single_row[25],
             )
@@ -92,59 +92,57 @@ class EthBlockDAO:
         self, async_connection: AsyncConnection, input: list[EthBlockDTO]
     ) -> None:
         insert_block: str = (
-            "INSERT into eth_blocks (id, jsonrpc, baseFeePerGas, blobGasUsed, difficulty, excessBlobGas, "
-            "extraData, gasLimit, gasUsed, hash, logsBloom, miner, mixHash, nonce, number, "
-            "parentBeaconBlockRoot, parentHash, receiptsRoot, sha3Uncles, size, stateRoot, "
-            "timestamp, totalDifficulty, transactionsRoot, withdrawalsRoot, created_at) values ("
-            ":id, :jsonrpc, :baseFeePerGas, :blobGasUsed, :difficulty, :excessBlobGas, "
-            ":extraData, :gasLimit, :gasUsed, :hash, :logsBloom, :miner, :mixHash, :nonce, :number, "
-            ":parentBeaconBlockRoot, :parentHash, :receiptsRoot, :sha3Uncles, :size, :stateRoot, "
-            ":timestamp, :totalDifficulty, :transactionsRoot, :withdrawalsRoot, :created_at) "
-            "RETURNING id, jsonrpc, baseFeePerGas, blobGasUsed, difficulty, excessBlobGas, "
-            "extraData, gasLimit, gasUsed, hash, logsBloom, miner, mixHash, nonce, number, "
-            "parentBeaconBlockRoot, parentHash, receiptsRoot, sha3Uncles, size, stateRoot, "
-            "timestamp, totalDifficulty, transactionsRoot, withdrawalsRoot, created_at"
+            "INSERT into eth_blocks (block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
+            "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
+            "parentbeaconblockroot, parenthash, receiptsroot, sha3uncles, size, stateroot, "
+            "timestamp, totaldifficulty, transactionsroot, withdrawalsroot, created_at) values ("
+            ":block_number, :id, :jsonrpc, :basefeepergas, :blobgasused, :difficulty, :excessblobgas, "
+            ":extradata, :gaslimit, :gasused, :hash, :logsbloom, :miner, :mixhash, :nonce, :number, "
+            ":parentbeaconblockroot, :parenthash, :receiptsroot, :sha3uncles, :size, :stateroot, "
+            ":timestamp, :totaldifficulty, :transactionsroot, :withdrawalsroot, :created_at) "
+            "RETURNING block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
+            "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
+            "parentbeaconblockroot, parenthash, receiptsroot, sha3uncles, size, stateroot, "
+            "timestamp, totaldifficulty, transactionsroot, withdrawalsroot, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)
+
+        unique_ids = [current_input.id for current_input in input]
+        print("UNIQUE IDS")
+        print(unique_ids)
 
         cursor_result: CursorResult = await async_connection.execute(
             insert_text_clause,
             [
                 {
+                    "block_number": single_input.block_number,
                     "id": single_input.id,
                     "jsonrpc": single_input.jsonrpc,
-                    "baseFeePerGas": single_input.baseFeePerGas,
-                    "blobGasUsed": single_input.blobGasUsed,
+                    "basefeepergas": single_input.baseFeePerGas,
+                    "blobgasused": single_input.blobGasUsed,
                     "difficulty": single_input.difficulty,
-                    "excessBlobGas": single_input.excessBlobGas,
-                    "extraData": single_input.extraData,
-                    "gasLimit": single_input.gasLimit,
-                    "gasUsed": single_input.gasUsed,
+                    "excessblobgas": single_input.excessBlobGas,
+                    "extradata": single_input.extraData,
+                    "gaslimit": single_input.gasLimit,
+                    "gasused": single_input.gasUsed,
                     "hash": single_input.hash,
-                    "logsBloom": single_input.logsBloom,
+                    "logsbloom": single_input.logsBloom,
                     "miner": single_input.miner,
-                    "mixHash": single_input.mixHash,
+                    "mixhash": single_input.mixHash,
                     "nonce": single_input.nonce,
                     "number": single_input.number,
-                    "parentBeaconBlockRoot": single_input.parentBeaconBlockRoot,
-                    "parentHash": single_input.parentHash,
-                    "receiptsRoot": single_input.receiptsRoot,
-                    "sha3Uncles": single_input.sha3Uncles,
+                    "parentbeaconblockroot": single_input.parentBeaconBlockRoot,
+                    "parenthash": single_input.parentHash,
+                    "receiptsroot": single_input.receiptsRoot,
+                    "sha3uncles": single_input.sha3Uncles,
                     "size": single_input.size,
-                    "stateRoot": single_input.stateRoot,
+                    "stateroot": single_input.stateRoot,
                     "timestamp": single_input.timestamp,
-                    "totalDifficulty": single_input.totalDifficulty,
-                    "transactionsRoot": single_input.transactionsRoot,
-                    "withdrawalsRoot": single_input.withdrawalsRoot,
+                    "totaldifficulty": single_input.totalDifficulty,
+                    "transactionsroot": single_input.transactionsRoot,
+                    "withdrawalsroot": single_input.withdrawalsRoot,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input
             ],
         )
-        inserted_rows: Sequence[Row] = cursor_result.fetchall()
-        if inserted_rows:
-            return None
-        else:
-            # okay to raise error; after 5 retries, this exception stops the data pipeline
-            # this is by design; it is better for the data pipeline to stop, than to silently fail
-            raise SQLAlchemyError("Failed to insert blocks. Retrying...")

@@ -14,5 +14,5 @@ class EthBlockImportStatusDTO(BaseModel):
         return EthBlockImportStatusDTO(
             id=uuid.uuid4(),
             block_number=block_number,
-            created_at=datetime.datetime.now(datetime.UTC),
+            created_at=datetime.datetime.utcnow(),
         )

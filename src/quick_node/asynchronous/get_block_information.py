@@ -49,9 +49,8 @@ async def get_block_information(
                     f"Received non-status code 200: {response.status}"
                 )
 
-    pprint(response_dict)
     response_model: QuickNodeEthBlockInformationResponse = (
-        QuickNodeEthBlockInformationResponse.from_json(response_dict)
+        QuickNodeEthBlockInformationResponse.from_json(block_number, response_dict)
     )
     return response_model
 
@@ -65,4 +64,4 @@ if __name__ == "__main__":
         block_information: QuickNodeEthBlockInformationResponse = (
             event_loop.run_until_complete(get_block_information(block_number))
         )
-        print(block_information)
+        print(block_information.id)

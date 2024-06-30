@@ -91,7 +91,7 @@ class QuickNodeEthBlockETLPipeline:
             start_block_number, end_block_number_int + 1, self._batch_size
         ):
             # Step 3: Extract, and Load
-            await self.run_for_batch(start, start + self._batch_size)
+            await self.run_for_batch(start, min(start + self._batch_size, end_block_number_int))
 
     async def run_for_batch(
         self, start_block_number: int, end_block_number: int
@@ -148,6 +148,10 @@ class QuickNodeEthBlockETLPipeline:
         """
         TODO: unit test this
         """
+        ids = [current_input.id for current_input in input]
+        print("blocks_to_dto IDS")
+        print(ids)
+
         batch_of_blocks_dto: list[EthBlockDTO] = []
         batch_of_transactions_dto: list[EthTransactionDTO] = []
         batch_of_withdrawals_dto: list[EthWithdrawalDTO] = []
@@ -161,7 +165,7 @@ class QuickNodeEthBlockETLPipeline:
             )
             withdrawal_dto_list: list[EthWithdrawalDTO] = [
                 EthWithdrawalDTO.from_quick_node_withdrawal(
-                    block_id=single_block.id, input=single_withdrawal
+                    block_number=single_block.block_number, input=single_withdrawal
                 )
                 for single_withdrawal in single_block.result.withdrawals
             ]

@@ -36,7 +36,7 @@ class EthTransactionAccessListDAO:
         self, id: str
     ) -> EthTransactionAccessListDTO | None:
         query_transaction_access_list_by_id: str = (
-            "SELECT id, transaction_hash, address, storageKeys, created_at "
+            "SELECT id, transaction_hash, address, storagekeys, created_at "
             "FROM eth_transaction_access_list WHERE id = :id limit 1"
         )
         query_text_clause: TextClause = text(query_transaction_access_list_by_id)
@@ -55,7 +55,7 @@ class EthTransactionAccessListDAO:
                     id=single_row[0],
                     transaction_hash=single_row[1],
                     address=single_row[2],
-                    storageKeys=single_row[3],
+                    storagekeys=single_row[3],
                     created_at=single_row[4],
                 )
             )
@@ -75,9 +75,9 @@ class EthTransactionAccessListDAO:
         input: list[EthTransactionAccessListDTO],
     ) -> None:
         insert_block: str = (
-            "INSERT into eth_transaction_access_list (id, transaction_hash, address, storageKeys, created_at) values ("
-            ":id, :transaction_hash, :address, :storageKeys, :created_at) "
-            "RETURNING id, transaction_hash, address, storageKeys, created_at"
+            "INSERT into eth_transaction_access_list (id, transaction_hash, address, storagekeys, created_at) values ("
+            ":id, :transaction_hash, :address, :storagekeys, :created_at) "
+            "RETURNING id, transaction_hash, address, storagekeys, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)
 
@@ -88,7 +88,7 @@ class EthTransactionAccessListDAO:
                     "id": single_input.id,
                     "transaction_hash": single_input.transaction_hash,
                     "address": single_input.address,
-                    "storageKeys": single_input.storageKeys,
+                    "storagekeys": single_input.storagekeys,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input

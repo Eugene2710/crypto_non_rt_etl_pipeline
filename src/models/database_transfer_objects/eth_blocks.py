@@ -17,7 +17,7 @@ class EthBlockDTO(BaseModel):
 
     Table: quick_node.blocks
     """
-
+    block_number: str
     id: int  # from QuickNodeEthBlockInformationResponse.id, don't generate this
     jsonrpc: str
     baseFeePerGas: str | None
@@ -54,6 +54,7 @@ class EthBlockDTO(BaseModel):
         Smart constructor to create a DTO from QuickNode service class
         """
         return EthBlockDTO(
+            block_number=input.block_number,
             id=input.id,
             jsonrpc=input.jsonrpc,
             baseFeePerGas=input.result.baseFeePerGas,
@@ -79,7 +80,5 @@ class EthBlockDTO(BaseModel):
             totalDifficulty=input.result.totalDifficulty,
             transactionsRoot=input.result.transactionsRoot,
             withdrawalsRoot=input.result.withdrawalsRoot,
-            created_at=datetime.datetime.now(
-                datetime.UTC
-            ),  # set created_at to UTC timezone
+            created_at=datetime.datetime.utcnow(),  # set created_at to UTC timezone
         )

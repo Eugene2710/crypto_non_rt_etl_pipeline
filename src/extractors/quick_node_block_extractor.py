@@ -17,6 +17,10 @@ class QuickNodeBlockExtractor(BaseExtractor[QuickNodeEthBlockInformationResponse
 
         Await for all blocks to return, then return
         """
+        print(f"start_block_number: {start_block_number}, end_block_number: {end_block_number}")
+        for curr_block_number in range(start_block_number, end_block_number + 1):
+            print(hex(curr_block_number))
+
         async_futures: list[Future[QuickNodeEthBlockInformationResponse]] = [
             asyncio.ensure_future(get_block_information(hex(curr_block_number)))
             for curr_block_number in range(start_block_number, end_block_number + 1)

@@ -33,9 +33,9 @@ class EthTransactionDAO:
         self, transaction_hash: str
     ) -> EthTransactionDTO | None:
         query_transaction_by_hash: str = (
-            "SELECT hash, block_id, blockHash, blockNumber, chainId, from_address, "
-            "gas, gasPrice, input, maxFeePerGas, maxPriorityFeePerGas, nonce, r, s, to_address, "
-            "transactionIndex, type, v, value, yParity, created_at "
+            "SELECT hash, block_id, blockhash, blocknumber, chainid, from_address, "
+            "gas, gasprice, input, maxfeepergas, maxpriorityfeepergas, nonce, r, s, to_address, "
+            "transactionindex, type, v, value, yparity, created_at "
             "FROM eth_transactions WHERE hash = :hash limit 1"
         )
         query_text_clause: TextClause = text(query_transaction_by_hash)
@@ -50,32 +50,27 @@ class EthTransactionDAO:
             return None
         else:
             eth_transaction_dto: EthTransactionDTO = EthTransactionDTO(
-                id=single_row[0],
-                jsonrpc=single_row[1],
-                baseFeePerGas=single_row[2],
-                blobGasUsed=single_row[3],
-                difficulty=single_row[4],
-                excessBlobGas=single_row[5],
-                extraData=single_row[6],
-                gasLimit=single_row[7],
-                gasUsed=single_row[8],
-                hash=single_row[9],
-                logsBloom=single_row[10],
-                miner=single_row[11],
-                mixHash=single_row[12],
-                nonce=single_row[13],
-                number=single_row[14],
-                parentBeaconBlockRoot=single_row[15],
-                parentHash=single_row[16],
-                receiptsRoot=single_row[17],
-                sha3Uncles=single_row[18],
-                size=single_row[19],
-                stateRoot=single_row[20],
-                timestamp=single_row[21],
-                totalDifficulty=single_row[22],
-                transactionRoot=single_row[23],
-                withdrawalsRoot=single_row[24],
-                created_at=single_row[25],
+                hash=single_row[0],
+                block_id=single_row[1],
+                blockhash=single_row[2],
+                blocknumber=single_row[3],
+                chainid=single_row[4],
+                from_address=single_row[5],
+                gas=single_row[6],
+                gasprice=single_row[7],
+                input=single_row[8],
+                maxfeepergas=single_row[9],
+                maxpriorityfeepergas=single_row[10],
+                nonce=single_row[11],
+                r=single_row[12],
+                s=single_row[13],
+                to_address=single_row[14],
+                transactionindex=single_row[15],
+                type=single_row[16],
+                v=single_row[17],
+                value=single_row[18],
+                yparity=single_row[19],
+                created_at=single_row[20],
             )
             return eth_transaction_dto
 
@@ -90,16 +85,20 @@ class EthTransactionDAO:
     async def insert_transactions(
         self, async_connection: AsyncConnection, input: list[EthTransactionDTO]
     ) -> None:
+        for single_input in input:
+            if single_input.hash is None:
+                raise ValueError("One of the transactions is missing the 'hash' attribute")
+
         insert_transactions: str = (
-            "INSERT into eth_transactions (hash, block_id, blockHash, blockNumber, chainId, from_address, "
-            "gas, gasPrice, input, maxFeePerGas, maxPriorityFeePerGas, nonce, r, s, to_address, "
-            "transactionIndex, type, v, value, yParity, created_at) values ("
-            ":hash, :block_id, :blockHash, :blockNumber, :chainId, :from_address, "
-            ":gas, :gasPrice, :input, :maxFeePerGas, :maxPriorityFeePerGas, :nonce, :r, :s, :to_address, "
-            ":transactionIndex, :type, :v, :value, :yParity, :created_at) "
-            "RETURNING hash, block_id, blockHash, blockNumber, chainId, from_address, "
-            "gas, gasPrice, input, maxFeePerGas, maxPriorityFeePerGas, nonce, r, s, to_address, "
-            "transactionIndex, type, v, value, yParity, created_at"
+            "INSERT into eth_transactions (hash, block_id, blockhash, blocknumber, chainid, from_address, "
+            "gas, gasprice, input, maxfeepergas, maxpriorityfeepergas, nonce, r, s, to_address, "
+            "transactionindex, type, v, value, yparity, created_at) values ("
+            ":hash, :block_id, :blockhash, :blocknumber, :chainid, :from_address, "
+            ":gas, :gasprice, :input, :maxfeepergas, :maxpriorityfeepergas, :nonce, :r, :s, :to_address, "
+            ":transactionindex, :type, :v, :value, :yparity, :created_at) "
+            "RETURNING hash, block_id, blockhash, blocknumber, chainid, from_address, "
+            "gas, gasprice, input, maxfeepergas, maxpriorityfeepergas, nonce, r, s, to_address, "
+            "transactionindex, type, v, value, yparity, created_at"
         )
         insert_text_clause: TextClause = text(insert_transactions)
 
@@ -109,33 +108,26 @@ class EthTransactionDAO:
                 {
                     "hash": single_input.hash,
                     "block_id": single_input.block_id,
-                    "blockHash": single_input.blockHash,
-                    "blockNumber": single_input.blockNumber,
-                    "chainId": single_input.chainId,
+                    "blockhash": single_input.blockhash,
+                    "blocknumber": single_input.blocknumber,
+                    "chainid": single_input.chainid,
                     "from_address": single_input.from_address,
                     "gas": single_input.gas,
-                    "gasPrice": single_input.gasPrice,
+                    "gasprice": single_input.gasprice,
                     "input": single_input.input,
-                    "maxFeePerGas": single_input.maxFeePerGas,
-                    "maxPriorityFeePerGas": single_input.maxPriorityFeePerGas,
+                    "maxfeepergas": single_input.maxfeepergas,
+                    "maxpriorityfeepergas": single_input.maxpriorityfeepergas,
                     "nonce": single_input.nonce,
                     "r": single_input.r,
                     "s": single_input.s,
                     "to_address": single_input.to_address,
-                    "transactionIndex": single_input.transactionIndex,
+                    "transactionindex": single_input.transactionindex,
                     "type": single_input.type,
                     "v": single_input.v,
                     "value": single_input.value,
-                    "yParity": single_input.yParity,
+                    "yparity": single_input.yparity,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input
             ],
         )
-        inserted_rows: Sequence[Row] = cursor_result.fetchall()
-        if inserted_rows:
-            return None
-        else:
-            # okay to raise error; after 5 retries, this exception stops the data pipeline
-            # this is by design; it is better for the data pipeline to stop, than to silently fail
-            raise SQLAlchemyError("Failed to insert blocks. Retrying...")

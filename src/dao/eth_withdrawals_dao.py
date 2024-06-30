@@ -31,7 +31,7 @@ class EthWithdrawalDAO:
     )
     async def read_withdrawal_by_id(self, id: str) -> EthWithdrawalDTO | None:
         query_withdrawal_by_id: str = (
-            "SELECT id, block_id, address, amount, index, validatorIndex, created_at "
+            "SELECT id, block_id, address, amount, index, validatorindex, created_at "
             "FROM eth_withdrawals WHERE id = :id limit 1"
         )
         query_text_clause: TextClause = text(query_withdrawal_by_id)
@@ -51,7 +51,7 @@ class EthWithdrawalDAO:
                 address=single_row[2],
                 amount=single_row[3],
                 index=single_row[4],
-                validatorIndex=single_row[5],
+                validatorindex=single_row[5],
                 created_at=single_row[6],
             )
             return eth_withdrawal_dto
@@ -68,9 +68,9 @@ class EthWithdrawalDAO:
         self, async_connection: AsyncConnection, input: list[EthWithdrawalDTO]
     ) -> None:
         insert_block: str = (
-            "INSERT into eth_withdrawals (id, block_id, address, amount, index, validatorIndex, created_at) values ("
-            ":id, :block_id, :address, :amount, :index, :validatorIndex, :created_at) "
-            "RETURNING id, block_id, address, amount, index, validatorIndex, created_at"
+            "INSERT into eth_withdrawals (id, block_id, address, amount, index, validatorindex, created_at) values ("
+            ":id, :block_id, :address, :amount, :index, :validatorindex, :created_at) "
+            "RETURNING id, block_id, address, amount, index, validatorindex, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)
 
@@ -83,16 +83,9 @@ class EthWithdrawalDAO:
                     "address": single_input.address,
                     "amount": single_input.amount,
                     "index": single_input.index,
-                    "validatorIndex": single_input.validatorIndex,
+                    "validatorindex": single_input.validatorindex,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input
             ],
         )
-        inserted_rows: Sequence[Row] = cursor_result.fetchall()
-        if inserted_rows:
-            return None
-        else:
-            # okay to raise error; after 5 retries, this exception stops the data pipeline
-            # this is by design; it is better for the data pipeline to stop, than to silently fail
-            raise SQLAlchemyError("Failed to insert blocks. Retrying...")

@@ -70,15 +70,16 @@ class QuickNodeEthBlockInformationResponse(BaseModel):
     Top level data-class
     Represents the payload schema
     """
-
+    block_number: str
     id: int  # id from quick node
     jsonrpc: str
     result: QuickNodeEthBlockInformationResult
 
     @staticmethod
-    def from_json(input: dict[str, Any]) -> "QuickNodeEthBlockInformationResponse":
+    def from_json(block_number: str, input: dict[str, Any]) -> "QuickNodeEthBlockInformationResponse":
         return QuickNodeEthBlockInformationResponse.model_validate(
             {
+                "block_number": block_number,
                 **input,
                 "result": QuickNodeEthBlockInformationResult.from_json(input["result"]),
             }

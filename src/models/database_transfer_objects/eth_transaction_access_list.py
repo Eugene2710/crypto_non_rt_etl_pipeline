@@ -26,5 +26,5 @@ class EthTransactionAccessListDTO(BaseModel):
             transaction_hash=transaction_hash,
             address=input.address,
             storageKeys=input.storageKeys,
-            created_at=datetime.datetime.now(datetime.UTC),
+            created_at=datetime.datetime.utcnow(),
         )

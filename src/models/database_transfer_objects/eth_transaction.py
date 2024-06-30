@@ -57,5 +57,5 @@ class EthTransactionDTO(BaseModel):
             v=input.v,
             value=input.value,
             yParity=input.yParity,
-            created_at=datetime.datetime.now(datetime.UTC),
+            created_at=datetime.datetime.utcnow(),
         )
