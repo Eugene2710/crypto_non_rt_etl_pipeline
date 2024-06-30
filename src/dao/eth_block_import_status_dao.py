@@ -1,4 +1,3 @@
-
 import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError

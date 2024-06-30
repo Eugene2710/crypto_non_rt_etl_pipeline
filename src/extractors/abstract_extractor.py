@@ -16,5 +16,7 @@ class BaseExtractor(ABC, Generic[EXTRACTED_BASE_MODEL]):
     """
 
     @abstractmethod
-    async def extract(self) -> EXTRACTED_BASE_MODEL:
+    async def extract(
+        self, start_block_number: int, end_block_number: int
+    ) -> EXTRACTED_BASE_MODEL:
         raise NotImplementedError()

@@ -26,7 +26,7 @@ load_dotenv()
     jitter=(-0.01, 0.01),
 )
 async def get_block_information(
-    block_number: str,
+    block_number: int,
 ) -> QuickNodeEthBlockInformationResponse:
     url: str = os.getenv("QUICK_NODE_URL")
     payload: str = json.dumps(
@@ -57,7 +57,7 @@ async def get_block_information(
 
 if __name__ == "__main__":
     event_loop: asyncio.AbstractEventLoop = asyncio.new_event_loop()
-    block_number: str = event_loop.run_until_complete(get_latest_block_number())
+    block_number: int = event_loop.run_until_complete(get_latest_block_number())
     block_information: QuickNodeEthBlockInformationResponse = (
         event_loop.run_until_complete(get_block_information(block_number))
     )

@@ -19,8 +19,9 @@ class EthTransactionAccessListDTO(BaseModel):
     class Config:
         orm_mode = True
 
+    @staticmethod
     def from_quick_node_eth_access_list_item(
-        self, transaction_hash: str, input: QuickNodeEthAccessListItem
+        transaction_hash: str, input: QuickNodeEthAccessListItem
     ) -> "EthTransactionAccessListDTO":
         return EthTransactionAccessListDTO(
             id=uuid.uuid4(),
