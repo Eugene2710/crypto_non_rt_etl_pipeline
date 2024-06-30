@@ -14,6 +14,7 @@ class BaseExtractor(ABC, Generic[EXTRACTED_BASE_MODEL]):
 
     they must implement an async extract method
     """
+
     @abstractmethod
     async def extract(self) -> EXTRACTED_BASE_MODEL:
         raise NotImplementedError()

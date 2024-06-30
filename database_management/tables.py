@@ -8,6 +8,8 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     UUID,
+    Integer,
+    Index,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -111,7 +113,7 @@ eth_transaction_access_list_table: Table = Table(
 # Withdrawals has a many to one relationship with blocks
 # data class: EthWithdrawalDTO
 eth_withdrawals_table: Table = Table(
-    "eth_withdrawals_table",
+    "eth_withdrawals",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
     # generate a unique id with uuid.uuid4() -> this is our own id as they didn't provide it
@@ -126,4 +128,17 @@ eth_withdrawals_table: Table = Table(
     Column("index", String, nullable=False),
     Column("validatorIndex", String, nullable=False),
     Column("created_at", DateTime, nullable=False),  # date you insert the row
+)
+
+# Q: Postgres has BTree and Hash index. Why did we use BTree?
+# A: We will use the index to get the latest block_number; the query relies on an order on block_number
+# Hash indexes don't support ordering
+# BTree indexes do. Hence, we use BTree
+eth_block_import_status_table: Table = Table(
+    "eth_block_import_status",
+    metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+    Column("block_number", Integer, nullable=False),
+    Column("created_at", DateTime, nullable=False),  # date you insert the row,
+    Index("block_number_index", "block_number", postgresql_using="btree"),
 )
