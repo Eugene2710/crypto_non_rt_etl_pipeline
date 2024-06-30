@@ -4,11 +4,21 @@ from typing import Any
 import aiohttp
 import asyncio
 import dotenv
+from retry import retry
 
+from src.quick_node.exceptions.quick_node_client_error import QuickNodeClientError
 
 dotenv.load_dotenv()
 
 
+@retry(
+    exceptions=(aiohttp.ClientError, QuickNodeClientError),
+    tries=5,
+    delay=0.1,
+    max_delay=0.3375,
+    backoff=1.5,
+    jitter=(-0.01, 0.01),
+)
 async def get_latest_block_number() -> str:
     url = os.getenv("QUICK_NODE_URL")
     payload: str = json.dumps(
@@ -25,7 +35,9 @@ async def get_latest_block_number() -> str:
                 result: dict[str, Any] = await response.json()
             else:
                 # can happen when quicknode server is down
-                raise Exception(f"Received non-status code 200: {response.status}")
+                raise QuickNodeClientError(
+                    f"Received non-status code 200: {response.status}"
+                )
 
     latest_block_number: str = result["result"]
     return latest_block_number

@@ -5,14 +5,26 @@ import aiohttp
 from dotenv import load_dotenv
 import json
 import os
+
+from retry import retry
+
 from src.models.quick_node_models.eth_blocks import (
     QuickNodeEthBlockInformationResponse,
 )
 from src.quick_node.asynchronous.get_latest_block import get_latest_block_number
+from src.quick_node.exceptions.quick_node_client_error import QuickNodeClientError
 
 load_dotenv()
 
 
+@retry(
+    exceptions=(aiohttp.ClientError, QuickNodeClientError),
+    tries=5,
+    delay=0.1,
+    max_delay=0.3375,
+    backoff=1.5,
+    jitter=(-0.01, 0.01),
+)
 async def get_block_information(
     block_number: str,
 ) -> QuickNodeEthBlockInformationResponse:
@@ -33,7 +45,9 @@ async def get_block_information(
                 response_dict: dict[str, Any] = await response.json()
             else:
                 # can happen when quicknode server is down
-                raise Exception(f"Received non-status code 200: {response.status}")
+                raise QuickNodeClientError(
+                    f"Received non-status code 200: {response.status}"
+                )
 
     response_model: QuickNodeEthBlockInformationResponse = (
         QuickNodeEthBlockInformationResponse.from_json(response_dict)

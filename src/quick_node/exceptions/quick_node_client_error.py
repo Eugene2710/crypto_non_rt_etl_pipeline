@@ -1,0 +1,2 @@
+class QuickNodeClientError(Exception):
+    pass
