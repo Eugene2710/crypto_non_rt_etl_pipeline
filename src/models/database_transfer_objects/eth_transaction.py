@@ -10,7 +10,7 @@ class EthTransactionDTO(BaseModel):
     """
 
     hash: str  # transaction hash, identifier
-    block_id: int
+    block_id: int | None = None
     blockHash: str | None = None
     blockNumber: str
     chainId: str | None = None

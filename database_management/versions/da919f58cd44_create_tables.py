@@ -1,8 +1,8 @@
-"""Create tables
+"""create tables
 
-Revision ID: 14076c3b03fc
+Revision ID: da919f58cd44
 Revises: 
-Create Date: 2024-06-30 22:52:50.694592
+Create Date: 2024-07-02 22:42:11.002127
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '14076c3b03fc'
+revision: str = 'da919f58cd44'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -60,9 +60,10 @@ def upgrade() -> None:
     op.create_table('eth_transactions',
     sa.Column('hash', sa.String(), nullable=False),
     sa.Column('block_number', sa.String(), nullable=False),
+    sa.Column('block_id', sa.Integer(), nullable=True),
     sa.Column('blockhash', sa.String(), nullable=True),
     sa.Column('chainid', sa.String(), nullable=True),
-    sa.Column('from', sa.String(), nullable=False),
+    sa.Column('from_address', sa.String(), nullable=False),
     sa.Column('gas', sa.String(), nullable=False),
     sa.Column('gasprice', sa.String(), nullable=False),
     sa.Column('input', sa.String(), nullable=False),
@@ -71,7 +72,7 @@ def upgrade() -> None:
     sa.Column('nonce', sa.String(), nullable=False),
     sa.Column('r', sa.String(), nullable=False),
     sa.Column('s', sa.String(), nullable=False),
-    sa.Column('to', sa.String(), nullable=False),
+    sa.Column('to_address', sa.String(), nullable=False),
     sa.Column('transactionindex', sa.String(), nullable=False),
     sa.Column('type', sa.String(), nullable=False),
     sa.Column('v', sa.String(), nullable=False),
