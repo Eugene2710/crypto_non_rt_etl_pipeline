@@ -1,5 +1,3 @@
-from typing import Sequence
-
 import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError
@@ -67,6 +65,9 @@ class EthWithdrawalDAO:
     async def insert_withdrawals(
         self, async_connection: AsyncConnection, input: list[EthWithdrawalDTO]
     ) -> None:
+        if not input:
+            print("insert_withdrawals: No input. Exiting")
+            return
         insert_block: str = (
             "INSERT into eth_withdrawals (id, block_id, address, amount, index, validatorindex, created_at) values ("
             ":id, :block_id, :address, :amount, :index, :validatorindex, :created_at) "
@@ -74,7 +75,7 @@ class EthWithdrawalDAO:
         )
         insert_text_clause: TextClause = text(insert_block)
 
-        cursor_result: CursorResult = await async_connection.execute(
+        _: CursorResult = await async_connection.execute(
             insert_text_clause,
             [
                 {

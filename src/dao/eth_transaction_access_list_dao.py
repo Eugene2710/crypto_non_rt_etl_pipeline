@@ -74,6 +74,9 @@ class EthTransactionAccessListDAO:
         async_connection: AsyncConnection,
         input: list[EthTransactionAccessListDTO],
     ) -> None:
+        if not input:
+            print("insert_transaction_access_list: No input. Exiting")
+            return
         insert_block: str = (
             "INSERT into eth_transaction_access_list (id, transaction_hash, address, storagekeys, created_at) values ("
             ":id, :transaction_hash, :address, :storagekeys, :created_at) "

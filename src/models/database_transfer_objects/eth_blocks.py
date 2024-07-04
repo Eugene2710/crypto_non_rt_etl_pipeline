@@ -2,6 +2,9 @@ import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from src.models.chain_stack_models.eth_blocks import (
+    ChainStackEthBlockInformationResponse,
+)
 from src.models.quick_node_models.eth_blocks import (
     QuickNodeEthBlockInformationResponse,
 )
@@ -17,6 +20,7 @@ class EthBlockDTO(BaseModel):
 
     Table: quick_node.blocks
     """
+
     block_number: str
     id: int  # from QuickNodeEthBlockInformationResponse.id, don't generate this
     jsonrpc: str
@@ -47,8 +51,10 @@ class EthBlockDTO(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
-    def from_quick_node_block_information_response(
-        input: QuickNodeEthBlockInformationResponse,
+    def from_block_information_response(
+        input: (
+            QuickNodeEthBlockInformationResponse | ChainStackEthBlockInformationResponse
+        ),
     ) -> "EthBlockDTO":
         """
         Smart constructor to create a DTO from QuickNode service class

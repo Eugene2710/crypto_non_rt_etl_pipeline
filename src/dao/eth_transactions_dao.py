@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-from typing import Sequence
 
 import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
@@ -90,9 +89,15 @@ class EthTransactionDAO:
     async def insert_transactions(
         self, async_connection: AsyncConnection, input: list[EthTransactionDTO]
     ) -> None:
+        if not input:
+            print("insert_transactions: No input. Exiting")
+            return
+
         for single_input in input:
             if single_input.hash is None:
-                raise ValueError("One of the transactions is missing the 'hash' attribute")
+                raise ValueError(
+                    "One of the transactions is missing the 'hash' attribute"
+                )
 
         insert_transactions: str = (
             "INSERT into eth_transactions (hash, block_id, blockhash, block_number, chainid, from_address, "
@@ -106,40 +111,39 @@ class EthTransactionDAO:
             "transactionindex, type, v, value, yparity, created_at"
         )
         insert_text_clause: TextClause = text(insert_transactions)
-
-        cursor_result: CursorResult = await async_connection.execute(
-            insert_text_clause,
-            [
-                {
-                    "hash": single_input.hash,
-                    "block_id": single_input.block_id,
-                    "blockhash": single_input.blockHash,
-                    "block_number": single_input.blockNumber,
-                    "chainid": single_input.chainId,
-                    "from_address": single_input.from_address,
-                    "gas": single_input.gas,
-                    "gasprice": single_input.gasPrice,
-                    "input": single_input.input,
-                    "maxfeepergas": single_input.maxFeePerGas,
-                    "maxpriorityfeepergas": single_input.maxPriorityFeePerGas,
-                    "nonce": single_input.nonce,
-                    "r": single_input.r,
-                    "s": single_input.s,
-                    "to_address": single_input.to_address,
-                    "transactionindex": single_input.transactionIndex,
-                    "type": single_input.type,
-                    "v": single_input.v,
-                    "value": single_input.value,
-                    "yparity": single_input.yParity,
-                    "created_at": single_input.created_at,
-                }
-                for single_input in input
-            ],
+        rows_to_insert = [
+            {
+                "hash": single_input.hash,
+                "block_id": single_input.block_id,
+                "blockhash": single_input.blockHash,
+                "block_number": single_input.blockNumber,
+                "chainid": single_input.chainId,
+                "from_address": single_input.from_address,
+                "gas": single_input.gas,
+                "gasprice": single_input.gasPrice,
+                "input": single_input.input,
+                "maxfeepergas": single_input.maxFeePerGas,
+                "maxpriorityfeepergas": single_input.maxPriorityFeePerGas,
+                "nonce": single_input.nonce,
+                "r": single_input.r,
+                "s": single_input.s,
+                "to_address": single_input.to_address,
+                "transactionindex": single_input.transactionIndex,
+                "type": single_input.type,
+                "v": single_input.v,
+                "value": single_input.value,
+                "yparity": single_input.yParity,
+                "created_at": single_input.created_at,
+            }
+            for single_input in input
+        ]
+        _: CursorResult = await async_connection.execute(
+            insert_text_clause, rows_to_insert
         )
 
 
 if __name__ == "__main__":
-    connection_string: str = "postgresql+asyncpg://localhost:5432/quick_node"
+    connection_string: str = "postgresql+asyncpg://localhost:5432/chain_stack"
     transaction_dao: EthTransactionDAO = EthTransactionDAO(connection_string)
     block_dao: EthBlockDAO = EthBlockDAO(connection_string)
 
@@ -172,7 +176,7 @@ if __name__ == "__main__":
                 "totalDifficulty": "20000000000000",
                 "transactionsRoot": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
                 "withdrawalsRoot": None,
-                "created_at": datetime.datetime(2024, 7, 2, 12, 0, 0)
+                "created_at": datetime.datetime(2024, 7, 2, 12, 0, 0),
             }
         )
     ]
@@ -200,7 +204,7 @@ if __name__ == "__main__":
                 "v": "0x1c",
                 "value": "1000000000000000000",
                 "yParity": None,
-                "created_at": datetime.datetime(2024, 7, 2, 12, 0, 0)
+                "created_at": datetime.datetime(2024, 7, 2, 12, 0, 0),
             }
         )
     ]

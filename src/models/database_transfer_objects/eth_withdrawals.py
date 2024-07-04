@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 import uuid
 import datetime
 
+from src.models.chain_stack_models.eth_withdrawal import ChainStackEthWithdrawal
 from src.models.quick_node_models.eth_blocks import QuickNodeEthWithdrawal
 
 
@@ -21,7 +22,7 @@ class EthWithdrawalDTO(BaseModel):
 
     @staticmethod
     def from_quick_node_withdrawal(
-        block_number: str, input: QuickNodeEthWithdrawal
+        block_number: str, input: QuickNodeEthWithdrawal | ChainStackEthWithdrawal
     ) -> "EthWithdrawalDTO":
         return EthWithdrawalDTO(
             id=uuid.uuid4(),

@@ -2,14 +2,16 @@ import asyncio
 from asyncio import Future
 
 from src.extractors.abstract_extractor import BaseExtractor
-from src.models.quick_node_models.eth_blocks import QuickNodeEthBlockInformationResponse
-from src.quick_node.asynchronous.get_block_information import get_block_information
+from src.models.chain_stack_models.eth_blocks import (
+    ChainStackEthBlockInformationResponse,
+)
+from src.chainstack.asynchronous.get_block_information import get_block_information
 
 
-class QuickNodeBlockExtractor(BaseExtractor[QuickNodeEthBlockInformationResponse]):
+class ChainStackBlockExtractor(BaseExtractor[ChainStackEthBlockInformationResponse]):
     async def extract(
         self, start_block_number: int, end_block_number: int
-    ) -> list[QuickNodeEthBlockInformationResponse]:
+    ) -> list[ChainStackEthBlockInformationResponse]:
         """
         Fires (end_block_number - start_block_number + 1) async queries to quicknode
 
@@ -17,19 +19,16 @@ class QuickNodeBlockExtractor(BaseExtractor[QuickNodeEthBlockInformationResponse
 
         Await for all blocks to return, then return
         """
-        print(
-            f"start_block_number: {start_block_number}, end_block_number: {end_block_number}"
-        )
         for curr_block_number in range(start_block_number, end_block_number + 1):
             print(hex(curr_block_number))
 
-        async_futures: list[Future[QuickNodeEthBlockInformationResponse]] = [
+        async_futures: list[Future[ChainStackEthBlockInformationResponse]] = [
             asyncio.ensure_future(get_block_information(hex(curr_block_number)))
             for curr_block_number in range(start_block_number, end_block_number + 1)
         ]
 
-        all_blocks_future: Future[list[QuickNodeEthBlockInformationResponse]] = (
+        all_blocks_future: Future[list[ChainStackEthBlockInformationResponse]] = (
             asyncio.gather(*async_futures)
         )
-        result: list[QuickNodeEthBlockInformationResponse] = await all_blocks_future
+        result: list[ChainStackEthBlockInformationResponse] = await all_blocks_future
         return result

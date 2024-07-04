@@ -1,6 +1,7 @@
 import datetime
 from pydantic import BaseModel, ConfigDict
 
+from src.models.chain_stack_models.eth_transaction import ChainStackEthTransaction
 from src.models.quick_node_models.eth_blocks import QuickNodeEthTransaction
 
 
@@ -33,8 +34,8 @@ class EthTransactionDTO(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
-    def from_quick_node_eth_transaction(
-        block_id: int, input: QuickNodeEthTransaction
+    def from_eth_transaction(
+        block_id: int, input: QuickNodeEthTransaction | ChainStackEthTransaction
     ) -> "EthTransactionDTO":
         return EthTransactionDTO(
             hash=input.hash,

@@ -1,6 +1,7 @@
 import asyncio
 import os
 from asyncio import Future
+from pprint import pprint
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
@@ -9,7 +10,10 @@ from src.dao.eth_block_import_status_dao import EthBlockImportStatusDAO
 from src.dao.eth_transaction_access_list_dao import EthTransactionAccessListDAO
 from src.dao.eth_transactions_dao import EthTransactionDAO
 from src.dao.eth_withdrawals_dao import EthWithdrawalDAO
-from src.extractors.quick_node_block_extractor import QuickNodeBlockExtractor
+from src.extractors.chain_stack_block_extractor import ChainStackBlockExtractor
+from src.models.chain_stack_models.eth_blocks import (
+    ChainStackEthBlockInformationResponse,
+)
 from src.models.database_transfer_objects.eth_block_import_status import (
     EthBlockImportStatusDTO,
 )
@@ -19,10 +23,9 @@ from src.models.database_transfer_objects.eth_transaction_access_list import (
     EthTransactionAccessListDTO,
 )
 from src.models.database_transfer_objects.eth_withdrawals import EthWithdrawalDTO
-from src.models.quick_node_models.eth_blocks import QuickNodeEthBlockInformationResponse
 
 
-class QuickNodeEthBlockETLPipeline:
+class ChainStackEthBlockETLPipeline:
     def __init__(
         self,
         import_status_dao: EthBlockImportStatusDAO,
@@ -30,11 +33,11 @@ class QuickNodeEthBlockETLPipeline:
         transaction_dao: EthTransactionDAO,
         transaction_access_list_dao: EthTransactionAccessListDAO,
         withdrawal_dao: EthWithdrawalDAO,
-        extractor: QuickNodeBlockExtractor,
+        extractor: ChainStackBlockExtractor,
         batch_size: int = 100,
     ) -> None:
         self._engine: AsyncEngine = create_async_engine(
-            os.getenv("QUICK_NODE_PG_CONNECTION_STRING", "")
+            os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
         )
         self._import_status_dao: EthBlockImportStatusDAO = import_status_dao
         self._block_dao: EthBlockDAO = block_dao
@@ -43,7 +46,7 @@ class QuickNodeEthBlockETLPipeline:
             transaction_access_list_dao
         )
         self._withdrawal_dao: EthWithdrawalDAO = withdrawal_dao
-        self._extractor: QuickNodeBlockExtractor = extractor
+        self._extractor: ChainStackBlockExtractor = extractor
         self._batch_size: int = batch_size
 
     async def run(self) -> None:
@@ -84,7 +87,8 @@ class QuickNodeEthBlockETLPipeline:
         # Remove this after testing
         start_block_number: int = 0  # latest_import_status.block_number + 1
         # Step 2: Fetch current latest block_number in quick node
-        end_block_number: str = "0x1"  # # await get_latest_block_number()
+        # IMPORTANT: THIS SINGLE LINE PROTECTS YOUR WALLET
+        end_block_number: str = "0x9"  # # await get_latest_block_number()
         end_block_number_int: int = int(end_block_number[2:], 16)
 
         for start in range(
@@ -114,7 +118,7 @@ class QuickNodeEthBlockETLPipeline:
         """
 
         # Step 3.1: Extract 100 block information from QuickNode
-        batch_of_blocks: list[QuickNodeEthBlockInformationResponse] = (
+        batch_of_blocks: list[ChainStackEthBlockInformationResponse] = (
             await self._extractor.extract(
                 start_block_number=start_block_number, end_block_number=end_block_number
             )
@@ -140,7 +144,7 @@ class QuickNodeEthBlockETLPipeline:
 
     @staticmethod
     def blocks_to_dto(
-        input: list[QuickNodeEthBlockInformationResponse],
+        input: list[ChainStackEthBlockInformationResponse],
     ) -> tuple[
         list[EthBlockDTO],
         list[EthTransactionDTO],
@@ -150,10 +154,6 @@ class QuickNodeEthBlockETLPipeline:
         """
         TODO: unit test this
         """
-        ids = [current_input.id for current_input in input]
-        print("blocks_to_dto IDS")
-        print(ids)
-
         batch_of_blocks_dto: list[EthBlockDTO] = []
         batch_of_transactions_dto: list[EthTransactionDTO] = []
         batch_of_withdrawals_dto: list[EthWithdrawalDTO] = []
@@ -228,6 +228,8 @@ class QuickNodeEthBlockETLPipeline:
             await self._block_dao.insert_blocks(
                 async_connection=async_connection, input=eth_block_dtos
             )
+            print("insert_dtos_and_update_import_status:")
+            pprint(eth_transaction_dtos)
             # then, insert withdrawals and transactions in parallel
             insert_transaction_future: Future = asyncio.ensure_future(
                 self._transaction_dao.insert_transactions(
@@ -262,7 +264,7 @@ class QuickNodeEthBlockETLPipeline:
 
 
 if __name__ == "__main__":
-    connection_string: str = os.getenv("QUICK_NODE_PG_CONNECTION_STRING", "")
+    connection_string: str = os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
     import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(
         connection_string=connection_string
     )
@@ -276,8 +278,8 @@ if __name__ == "__main__":
     withdrawal_dao: EthWithdrawalDAO = EthWithdrawalDAO(
         connection_string=connection_string
     )
-    extractor: QuickNodeBlockExtractor = QuickNodeBlockExtractor()
-    etl_pipeline: QuickNodeEthBlockETLPipeline = QuickNodeEthBlockETLPipeline(
+    extractor: ChainStackBlockExtractor = ChainStackBlockExtractor()
+    etl_pipeline: ChainStackEthBlockETLPipeline = ChainStackEthBlockETLPipeline(
         import_status_dao=import_status_dao,
         block_dao=block_dao,
         transaction_dao=transaction_dao,

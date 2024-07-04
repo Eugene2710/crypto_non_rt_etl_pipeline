@@ -1,3 +1,7 @@
+import asyncio
+import datetime
+import uuid
+
 import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError
@@ -92,3 +96,20 @@ class EthBlockImportStatusDAO:
             raise SQLAlchemyError(
                 f"Failed to insert import status, id: {input.id}, block_number: {input.block_number}, created_at: {input.created_at}. Retrying..."
             )
+
+
+if __name__ == "__main__":
+    connection_string: str = "postgresql+asyncpg://localhost:5432/chain_stack"
+    import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(connection_string)
+    import_status_dto: EthBlockImportStatusDTO = EthBlockImportStatusDTO(
+        id=uuid.uuid4(),
+        block_number=1,
+        created_at=datetime.datetime.utcnow()
+    )
+
+    async def run_insert_status() -> None:
+        engine: AsyncEngine = create_async_engine(connection_string)
+        async with engine.begin() as conn:
+            await import_status_dao.insert_import_status(conn, import_status_dto)
+
+    asyncio.run(run_insert_status())

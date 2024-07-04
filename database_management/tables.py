@@ -25,9 +25,7 @@ metadata: MetaData = MetaData()
 eth_block_table = Table(
     "eth_blocks",
     metadata,
-    Column(
-        "block_number", String, primary_key=True
-    ),
+    Column("block_number", String, primary_key=True),
     Column(
         "id", Integer, nullable=False
     ),  # this id is from quick node; don't generate this
@@ -71,7 +69,7 @@ eth_transaction_table: Table = Table(
         ForeignKey("eth_blocks.block_number", name="transactions_to_blocks_fk"),
         nullable=False,
     ),  # this id is from quick node; don't generate this
-    Column("block_id", Integer, nullable=True),     # from eth_blocks.block_id
+    Column("block_id", Integer, nullable=True),  # from eth_blocks.block_id
     Column("blockhash", String, nullable=True),  # can be null for unsealed block
     Column("chainid", String, nullable=True),
     Column("from_address", String, nullable=False),
@@ -141,7 +139,7 @@ eth_block_import_status_table: Table = Table(
     "eth_block_import_status",
     metadata,
     Column("id", UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
-    Column("block_number", String, nullable=False),
+    Column("block_number", Integer, nullable=False),
     Column("created_at", DateTime, nullable=False),  # date you insert the row,
     Index("block_number_index", "block_number", postgresql_using="btree"),
 )

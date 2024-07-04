@@ -2,11 +2,11 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
-from src.models.quick_node_models.eth_transaction import QuickNodeEthTransaction
-from src.models.quick_node_models.eth_withdrawal import QuickNodeEthWithdrawal
+from src.models.chain_stack_models.eth_transaction import ChainStackEthTransaction
+from src.models.chain_stack_models.eth_withdrawal import ChainStackEthWithdrawal
 
 
-class QuickNodeEthBlockInformationResult(
+class ChainStackEthBlockInformationResult(
     BaseModel
 ):  # create a block table -> foreign key constraint to transaction table
     """
@@ -37,25 +37,25 @@ class QuickNodeEthBlockInformationResult(
     stateRoot: str
     timestamp: str
     totalDifficulty: str
-    transactions: list[QuickNodeEthTransaction]  # create a transaction table
+    transactions: list[ChainStackEthTransaction]  # create a transaction table
     transactionsRoot: str
     uncles: list[str]
-    withdrawals: list[QuickNodeEthWithdrawal]
+    withdrawals: list[ChainStackEthWithdrawal]
     withdrawalsRoot: str | None = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod
-    def from_json(input: dict[str, Any]) -> "QuickNodeEthBlockInformationResult":
-        return QuickNodeEthBlockInformationResult.model_validate(
+    def from_json(input: dict[str, Any]) -> "ChainStackEthBlockInformationResult":
+        return ChainStackEthBlockInformationResult.model_validate(
             {
                 **input,
                 "transactions": [
-                    QuickNodeEthTransaction.from_json(single_transaction)
+                    ChainStackEthTransaction.from_json(single_transaction)
                     for single_transaction in input["transactions"]
                 ],
                 "withdrawals": (
                     [
-                        QuickNodeEthWithdrawal.model_validate(single_withdrawal)
+                        ChainStackEthWithdrawal.model_validate(single_withdrawal)
                         for single_withdrawal in input.get("withdrawals")
                     ]
                     if "withdrawals" in input
@@ -65,7 +65,7 @@ class QuickNodeEthBlockInformationResult(
         )
 
 
-class QuickNodeEthBlockInformationResponse(BaseModel):
+class ChainStackEthBlockInformationResponse(BaseModel):
     """
     Top level data-class
     Represents the payload schema
@@ -74,16 +74,18 @@ class QuickNodeEthBlockInformationResponse(BaseModel):
     block_number: str
     id: int  # id from quick node
     jsonrpc: str
-    result: QuickNodeEthBlockInformationResult
+    result: ChainStackEthBlockInformationResult
 
     @staticmethod
     def from_json(
         block_number: str, input: dict[str, Any]
-    ) -> "QuickNodeEthBlockInformationResponse":
-        return QuickNodeEthBlockInformationResponse.model_validate(
+    ) -> "ChainStackEthBlockInformationResponse":
+        return ChainStackEthBlockInformationResponse.model_validate(
             {
                 "block_number": block_number,
                 **input,
-                "result": QuickNodeEthBlockInformationResult.from_json(input["result"]),
+                "result": ChainStackEthBlockInformationResult.from_json(
+                    input["result"]
+                ),
             }
         )

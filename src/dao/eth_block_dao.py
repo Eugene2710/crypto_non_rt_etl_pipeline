@@ -1,5 +1,3 @@
-from typing import Sequence
-
 import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError
@@ -91,6 +89,9 @@ class EthBlockDAO:
     async def insert_blocks(
         self, async_connection: AsyncConnection, input: list[EthBlockDTO]
     ) -> None:
+        if not input:
+            print("insert_blocks: No input. Exiting")
+            return
         insert_block: str = (
             "INSERT into eth_blocks (block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
             "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
@@ -111,7 +112,7 @@ class EthBlockDAO:
         print("UNIQUE IDS")
         print(unique_ids)
 
-        cursor_result: CursorResult = await async_connection.execute(
+        _: CursorResult = await async_connection.execute(
             insert_text_clause,
             [
                 {

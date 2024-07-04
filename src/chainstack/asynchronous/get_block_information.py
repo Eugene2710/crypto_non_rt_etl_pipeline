@@ -8,16 +8,16 @@ import os
 
 from retry import retry
 
-from src.models.quick_node_models.eth_blocks import (
-    QuickNodeEthBlockInformationResponse,
+from src.chainstack.exceptions.chainstack_client_error import ChainStackClientError
+from src.models.chain_stack_models.eth_blocks import (
+    ChainStackEthBlockInformationResponse,
 )
-from src.quick_node.exceptions.quick_node_client_error import QuickNodeClientError
 
 load_dotenv()
 
 
 @retry(
-    exceptions=(aiohttp.ClientError, QuickNodeClientError),
+    exceptions=(aiohttp.ClientError, ChainStackClientError),
     tries=5,
     delay=0.1,
     max_delay=0.3375,
@@ -26,8 +26,8 @@ load_dotenv()
 )
 async def get_block_information(
     block_number: str,
-) -> QuickNodeEthBlockInformationResponse:
-    url: str = os.getenv("QUICK_NODE_URL")
+) -> ChainStackEthBlockInformationResponse:
+    url = os.getenv("CHAIN_STACK_URL")
     payload: str = json.dumps(
         {
             "method": "eth_getBlockByNumber",
@@ -43,13 +43,13 @@ async def get_block_information(
             if response.status == 200:
                 response_dict: dict[str, Any] = await response.json()
             else:
-                # can happen when quicknode server is down
-                raise QuickNodeClientError(
+                # can happen when chainstack server is down
+                raise ChainStackClientError(
                     f"Received non-status code 200: {response.status}"
                 )
 
-    response_model: QuickNodeEthBlockInformationResponse = (
-        QuickNodeEthBlockInformationResponse.from_json(block_number, response_dict)
+    response_model: ChainStackEthBlockInformationResponse = (
+        ChainStackEthBlockInformationResponse.from_json(block_number, response_dict)
     )
     return response_model
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         block_number: str = hex(
             i
         )  # event_loop.run_until_complete(get_latest_block_number())
-        block_information: QuickNodeEthBlockInformationResponse = (
+        block_information: ChainStackEthBlockInformationResponse = (
             event_loop.run_until_complete(get_block_information(block_number))
         )
         print(block_information.id)
