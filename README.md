@@ -54,3 +54,11 @@ Step 2: Run the pipeline
 export PYTHONPATH=.
 python src/chain_stack_eth_block_etl_pipeline.py
 ```
+
+## TODOs:
+- Integration test extractors
+- Integration test DAOs
+- Unit Test ETLPipeline Service Level class to DTO class
+- Refactor ETLPipeline to combine ETLPipeline for QuickNode and ChainStack to use Generics (for DTOs), to reduce code duplication
+- Explore other types of data to be extracted from Chainstack
+- Explore use cases of data
