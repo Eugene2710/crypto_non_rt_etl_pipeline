@@ -52,5 +52,5 @@ Step 2: Run the pipeline
 
 ```commandline
 export PYTHONPATH=.
-python src/quick_node_eth_block_etl_pipeline.py
+python src/chain_stack_eth_block_etl_pipeline.py
 ```
