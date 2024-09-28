@@ -20,6 +20,7 @@ aiohttp = "^3.9.5"
 retry = "^0.9.2"
 asyncpg = "^0.29.0"
 greenlet = "^3.0.3"
+pytest-asyncio-cooperative = "^0.37.0"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.4.8"

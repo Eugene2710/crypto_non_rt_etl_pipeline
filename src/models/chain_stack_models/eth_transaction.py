@@ -1,6 +1,6 @@
 from typing import Any
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, AliasChoices
 
 from src.models.chain_stack_models.eth_access_list_item import (
     ChainStackEthAccessListItem,
@@ -14,7 +14,9 @@ class ChainStackEthTransaction(BaseModel):
     blockHash: str | None  # can be null for unsealed block
     blockNumber: str
     chainId: str | None = None
-    from_: str = Field(..., alias="from")
+    from_: str = Field(
+        ..., validation_alias=AliasChoices("from_", "from"), serialization_alias="from_"
+    )
     gas: str
     gasPrice: str
     hash: str  # hash
@@ -24,7 +26,7 @@ class ChainStackEthTransaction(BaseModel):
     nonce: str
     r: str
     s: str
-    to: str
+    to: str | None
     transactionIndex: str
     type: str
     v: str

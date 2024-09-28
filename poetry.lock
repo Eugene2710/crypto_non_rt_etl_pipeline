@@ -1135,6 +1135,17 @@ tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-asyncio-cooperative"
+version = "0.37.0"
+description = "Run all your asynchronous tests cooperatively."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytest_asyncio_cooperative-0.37.0-py3-none-any.whl", hash = "sha256:cc8a03cbdce0ffa8c78cba6b7584a42e84d0b65b88b20fbb6e553bdf87612506"},
+    {file = "pytest_asyncio_cooperative-0.37.0.tar.gz", hash = "sha256:c7d8823c638374420c9b7e55caa345527153c76e0c458ac9416df4b039705e6b"},
+]
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -1442,4 +1453,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "978f78104983e31743b9a7bf01ab89e6e731f444dea7bc7e9e57a9bae36fc7e8"
+content-hash = "578d493bb3149734ea49bf5da4031ede24bc403256b050b175c041511e6815f5"
