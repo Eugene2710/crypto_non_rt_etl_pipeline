@@ -36,7 +36,7 @@ class EthBlockImportStatusDAO:
     )
     async def read_latest_import_status(self) -> EthBlockImportStatusDTO | None:
         query_latest_import_status: str = (
-            "SELECT id, block_number, created_at from eth_block_import_status ORDER BY block_number LIMIT 1"
+            "SELECT id, block_number, created_at from eth_block_import_status ORDER BY block_number DESC LIMIT 1"
         )
         query_text_clause: TextClause = text(query_latest_import_status)
 
