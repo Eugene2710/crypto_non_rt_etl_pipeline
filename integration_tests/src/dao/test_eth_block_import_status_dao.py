@@ -78,7 +78,8 @@ def create_and_drop_db_and_tables(db_name: str):
     finally:
         # Ensure all connections to the DB is closed
         # before dropping the database
-        test_db_engine.dispose()
+        if test_db_engine:
+            test_db_engine.dispose()
         # TEARDOWN
         with default_db_engine.connect().execution_options(
             isolation_level="AUTOCOMMIT"
@@ -125,12 +126,10 @@ def setup_test_read_latest_import_status(
 
 @pytest.fixture
 def setup_test_insert_import_status(
-    create_and_drop_db_and_tables,
-    db_name: str,
+    create_and_drop_db_and_tables
 ):
     yield
 
-> Clement Goh:
 class TestEthBlockImportStatusDAO:
     @pytest.mark.asyncio_cooperative
     async def test_read_latest_import_status(
@@ -194,4 +193,3 @@ class TestEthBlockImportStatusDAO:
             raise e
         finally:
             await dao._engine.dispose()
-`
