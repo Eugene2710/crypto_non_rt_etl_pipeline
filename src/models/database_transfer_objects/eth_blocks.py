@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.models.chain_stack_models.eth_blocks import (
     ChainStackEthBlockInformationResponse,
@@ -21,33 +21,41 @@ class EthBlockDTO(BaseModel):
     Table: quick_node.blocks
     """
 
-    block_number: str
-    id: int  # from QuickNodeEthBlockInformationResponse.id, don't generate this
-    jsonrpc: str
-    baseFeePerGas: str | None
-    blobGasUsed: str | None
-    difficulty: str
-    excessBlobGas: str | None
-    extraData: str
-    gasLimit: str
-    gasUsed: str
-    hash: str | None  # can be null for unsealed block
-    logsBloom: str
-    miner: str
-    mixHash: str
-    nonce: str
-    number: str
-    parentBeaconBlockRoot: str | None
-    parentHash: str
-    receiptsRoot: str
-    sha3Uncles: str
-    size: str
-    stateRoot: str
-    timestamp: str
-    totalDifficulty: str
-    transactionsRoot: str
-    withdrawalsRoot: str | None
-    created_at: datetime.datetime
+    block_number: str = Field(serialization_alias="block_number")
+    id: int = Field(
+        serialization_alias="id"
+    )  # from QuickNodeEthBlockInformationResponse.id
+    jsonrpc: str = Field(serialization_alias="jsonrpc")
+    baseFeePerGas: str | None = Field(None, serialization_alias="basefeepergas")
+    blobGasUsed: str | None = Field(None, serialization_alias="blobgasused")
+    difficulty: str = Field(serialization_alias="difficulty")
+    excessBlobGas: str | None = Field(None, serialization_alias="excessblobgas")
+    extraData: str = Field(serialization_alias="extradata")
+    gasLimit: str = Field(serialization_alias="gaslimit")
+    gasUsed: str = Field(serialization_alias="gasused")
+    hash: str | None = Field(
+        None, serialization_alias="hash"
+    )  # can be null for unsealed block
+    logsBloom: str = Field(serialization_alias="logsbloom")
+    miner: str = Field(serialization_alias="miner")
+    mixHash: str = Field(serialization_alias="mixhash")
+    nonce: str = Field(serialization_alias="nonce")
+    number: str = Field(serialization_alias="number")
+    parentBeaconBlockRoot: str | None = Field(
+        None, serialization_alias="parentbeaconblockroot"
+    )
+    parentHash: str = Field(serialization_alias="parenthash")
+    receiptsRoot: str = Field(serialization_alias="receiptsroot")
+    sha3Uncles: str = Field(serialization_alias="sha3uncles")
+    size: str = Field(serialization_alias="size")
+    stateRoot: str = Field(serialization_alias="stateroot")
+    timestamp: str = Field(serialization_alias="timestamp")
+    totalDifficulty: str = Field(serialization_alias="totaldifficulty")
+    transactionsRoot: str = Field(serialization_alias="transactionsroot")
+    withdrawalsRoot: str | None = Field(None, serialization_alias="withdrawalsroot")
+    created_at: datetime = Field(
+        default_factory=datetime.datetime.utcnow, serialization_alias="created_at"
+    )
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     @staticmethod

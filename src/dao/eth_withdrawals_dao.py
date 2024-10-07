@@ -29,7 +29,7 @@ class EthWithdrawalDAO:
     )
     async def read_withdrawal_by_id(self, id: str) -> EthWithdrawalDTO | None:
         query_withdrawal_by_id: str = (
-            "SELECT id, block_id, address, amount, index, validatorindex, created_at "
+            "SELECT id, block_number, address, amount, index, validatorIndex, created_at "
             "FROM eth_withdrawals WHERE id = :id limit 1"
         )
         query_text_clause: TextClause = text(query_withdrawal_by_id)
@@ -45,11 +45,11 @@ class EthWithdrawalDAO:
         else:
             eth_withdrawal_dto: EthWithdrawalDTO = EthWithdrawalDTO(
                 id=single_row[0],
-                block_id=single_row[1],
+                block_number=single_row[1],
                 address=single_row[2],
                 amount=single_row[3],
                 index=single_row[4],
-                validatorindex=single_row[5],
+                validatorIndex=single_row[5],
                 created_at=single_row[6],
             )
             return eth_withdrawal_dto
@@ -69,9 +69,9 @@ class EthWithdrawalDAO:
             print("insert_withdrawals: No input. Exiting")
             return
         insert_block: str = (
-            "INSERT into eth_withdrawals (id, block_id, address, amount, index, validatorindex, created_at) values ("
-            ":id, :block_id, :address, :amount, :index, :validatorindex, :created_at) "
-            "RETURNING id, block_id, address, amount, index, validatorindex, created_at"
+            "INSERT into eth_withdrawals (id, block_number, address, amount, index, validatorIndex, created_at) values ("
+            ":id, :block_number, :address, :amount, :index, :validatorIndex, :created_at) "
+            "RETURNING id, block_id, address, amount, index, validatorIndex, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)
 
@@ -80,11 +80,11 @@ class EthWithdrawalDAO:
             [
                 {
                     "id": single_input.id,
-                    "block_id": single_input.block_id,
+                    "block_number": single_input.block_number,
                     "address": single_input.address,
                     "amount": single_input.amount,
                     "index": single_input.index,
-                    "validatorindex": single_input.validatorindex,
+                    "validatorindex": single_input.validatorIndex,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input

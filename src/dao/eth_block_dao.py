@@ -29,19 +29,19 @@ class EthBlockDAO:
         backoff=1.5,
         jitter=(-0.01, 0.01),
     )
-    async def read_block_by_id(self, block_id: str) -> EthBlockDTO | None:
+    async def read_block_by_block_number(self, block_number: str) -> EthBlockDTO | None:
         query_block_by_id: str = (
             "SELECT block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
             "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
             "parentbeaconblockroot, parenthash, receiptsroot, sha3uncles, size, stateroot, "
             "timestamp, totaldifficulty, transactionsroot, withdrawalsroot, created_at "
-            "FROM eth_blocks WHERE id = :id limit 1"
+            "FROM eth_blocks WHERE block_number = :block_number limit 1"
         )
         query_text_clause: TextClause = text(query_block_by_id)
 
         async with self._engine.begin() as async_conn:
             cursor_result: CursorResult = await async_conn.execute(
-                query_text_clause, {"id": block_id}
+                query_text_clause, {"block_number": block_number}
             )
 
         single_row: Row | None = cursor_result.fetchone()
