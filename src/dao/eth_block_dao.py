@@ -100,7 +100,7 @@ class EthBlockDAO:
             ":block_number, :id, :jsonrpc, :basefeepergas, :blobgasused, :difficulty, :excessblobgas, "
             ":extradata, :gaslimit, :gasused, :hash, :logsbloom, :miner, :mixhash, :nonce, :number, "
             ":parentbeaconblockroot, :parenthash, :receiptsroot, :sha3uncles, :size, :stateroot, "
-            ":timestamp, :totaldifficulty, :transactionsroot, :withdrawalsroot, :created_at) "
+            ":timestamp, :totaldifficulty, :transactionsroot, :withdrawalsroot, :created_at) ON CONFLICT DO NOTHING "
             "RETURNING block_number, id, jsonrpc, basefeepergas, blobgasused, difficulty, excessblobgas, "
             "extradata, gaslimit, gasused, hash, logsbloom, miner, mixhash, nonce, number, "
             "parentbeaconblockroot, parenthash, receiptsroot, sha3uncles, size, stateroot, "

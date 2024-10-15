@@ -23,6 +23,9 @@ from src.models.database_transfer_objects.eth_transaction_access_list import (
     EthTransactionAccessListDTO,
 )
 from src.models.database_transfer_objects.eth_withdrawals import EthWithdrawalDTO
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class ChainStackEthBlockETLPipeline:
@@ -85,10 +88,11 @@ class ChainStackEthBlockETLPipeline:
 
         # TODO: temporarily make the ETL pipeline run for only block number 0 to 1 for testing (2 blocks)
         # Remove this after testing
-        start_block_number: int = 0  # latest_import_status.block_number + 1
+        start_block_number: int = latest_import_status.block_number + 1
         # Step 2: Fetch current latest block_number in quick node
         # IMPORTANT: THIS SINGLE LINE PROTECTS YOUR WALLET
-        end_block_number: str = "0x9"  # # await get_latest_block_number()
+        # Temporarily ingest block 0 to block 10
+        end_block_number: str = hex(start_block_number + 100)  # await get_latest_block_number()
         end_block_number_int: int = int(end_block_number[2:], 16)
 
         for start in range(
@@ -263,7 +267,7 @@ class ChainStackEthBlockETLPipeline:
             )
 
 
-if __name__ == "__main__":
+def trigger_etl_pipeline() -> None:
     connection_string: str = os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
     import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(
         connection_string=connection_string
@@ -289,3 +293,7 @@ if __name__ == "__main__":
         batch_size=100,
     )
     asyncio.run(etl_pipeline.run())
+
+
+if __name__ == "__main__":
+    trigger_etl_pipeline()

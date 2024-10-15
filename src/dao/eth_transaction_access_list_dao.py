@@ -79,7 +79,7 @@ class EthTransactionAccessListDAO:
             return
         insert_block: str = (
             "INSERT into eth_transaction_access_list (id, transaction_hash, address, storagekeys, created_at) values ("
-            ":id, :transaction_hash, :address, :storagekeys, :created_at) "
+            ":id, :transaction_hash, :address, :storagekeys, :created_at) ON CONFLICT DO NOTHING "
             "RETURNING id, transaction_hash, address, storagekeys, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)

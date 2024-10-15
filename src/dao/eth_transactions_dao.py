@@ -105,7 +105,7 @@ class EthTransactionDAO:
             "transactionindex, type, v, value, yparity, created_at) values ("
             ":hash, :block_id, :blockhash, :block_number, :chainid, :from_address, "
             ":gas, :gasprice, :input, :maxfeepergas, :maxpriorityfeepergas, :nonce, :r, :s, :to_address, "
-            ":transactionindex, :type, :v, :value, :yparity, :created_at) "
+            ":transactionindex, :type, :v, :value, :yparity, :created_at) ON CONFLICT DO NOTHING "
             "RETURNING hash, block_id, blockhash, block_number, chainid, from_address, "
             "gas, gasprice, input, maxfeepergas, maxpriorityfeepergas, nonce, r, s, to_address, "
             "transactionindex, type, v, value, yparity, created_at"

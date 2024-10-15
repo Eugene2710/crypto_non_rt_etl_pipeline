@@ -36,7 +36,7 @@ class ChainStackEthBlockInformationResult(
     size: str
     stateRoot: str
     timestamp: str
-    totalDifficulty: str
+    totalDifficulty: str | None = None
     transactions: list[ChainStackEthTransaction]  # create a transaction table
     transactionsRoot: str
     uncles: list[str]

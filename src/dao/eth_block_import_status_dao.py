@@ -100,11 +100,11 @@ class EthBlockImportStatusDAO:
 
 if __name__ == "__main__":
     connection_string: str = "postgresql+asyncpg://localhost:5432/chain_stack"
-    import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(connection_string)
+    import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(
+        connection_string
+    )
     import_status_dto: EthBlockImportStatusDTO = EthBlockImportStatusDTO(
-        id=uuid.uuid4(),
-        block_number=1,
-        created_at=datetime.datetime.utcnow()
+        id=uuid.uuid4(), block_number=1, created_at=datetime.datetime.utcnow()
     )
 
     async def run_insert_status() -> None:

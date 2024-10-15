@@ -91,7 +91,7 @@ class EthBlockDTO(BaseModel):
             size=input.result.size,
             stateRoot=input.result.stateRoot,
             timestamp=input.result.timestamp,
-            totalDifficulty=input.result.totalDifficulty,
+            totalDifficulty=input.result.totalDifficulty or "",
             transactionsRoot=input.result.transactionsRoot,
             withdrawalsRoot=input.result.withdrawalsRoot,
             created_at=datetime.datetime.utcnow(),  # set created_at to UTC timezone
