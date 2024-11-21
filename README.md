@@ -55,10 +55,23 @@ export PYTHONPATH=.
 python src/chain_stack_eth_block_etl_pipeline.py
 ```
 
+### Streamlit
+```commandline
+ngrok http --url=eminently-accurate-lacewing.ngrok-free.app 8501
+export PYTHONPATH=.
+streamlit run client/streamlit_app.py
+```
+Visit [this link](https://eminently-accurate-lacewing.ngrok-free.app) for a live demo of the streamlit
+![image](./images/crypto_non_rt_etl_pipeline_streamlit.png)
+This streamlit app allows the querying of database and visualizing the data
+
+### Airflow
+Refer to [this repository](https://github.com/Eugene2710/crypto_non_rt_etl_pipeline_dag) for ETL pipeline schedule in dag files
+
+![image](./images/airflow_crypto_non_rt_etl_pipeline_dag.png)
+
 ## TODOs:
-- Integration test extractors
-- Integration test DAOs
+- Integration test the rest of the DAOs
 - Unit Test ETLPipeline Service Level class to DTO class
-- Refactor ETLPipeline to combine ETLPipeline for QuickNode and ChainStack to use Generics (for DTOs), to reduce code duplication
 - Explore other types of data to be extracted from Chainstack
 - Explore use cases of data
