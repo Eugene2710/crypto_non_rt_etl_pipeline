@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # First to execute: Spin up Postgres Server
+  postgres:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chain_stack
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  # Second to execute: Alembic upgrade head to create tables
+  migrations:
+    image: crypto_non_rt_etl_pipeline
+    command: sh -c "alembic upgrade head"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_URL: postgresql://postgres:password@postgres:5432/chain_stack
+    networks:
+      - app_network
+
+  streamlit_app:
+    build: .  # find the Dockerfile in the current working directory
+    image: crypto_non_rt_etl_pipeline # name of the image you build
+    ports:
+      - "8501:8501"
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_URL: postgresql://postgres:password@postgres:5432/chain_stack
+      CHAIN_STACK_PG_CONNECTION_STRING: postgresql+asyncpg://postgres:password@postgres:5432/chain_stack
+      PYTHONPATH: /app
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

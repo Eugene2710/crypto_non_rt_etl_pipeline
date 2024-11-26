@@ -8,6 +8,9 @@ QuickNode provides raw data from Ethereum / Polygon nodes, but it doesn't give u
 
 This data pipeline allows us to do that.
 
+REMINDER: to run this on your end, you need a chainstack account, 
+or quicknode account (change the environment variables accordingly if this is used)
+
 ## MIRO Architecture 
  
 ![image](./images/architecture.png)
@@ -69,6 +72,13 @@ This streamlit app allows the querying of database and visualizing the data
 Refer to [this repository](https://github.com/Eugene2710/crypto_non_rt_etl_pipeline_dag) for ETL pipeline schedule in dag files
 
 ![image](./images/airflow_crypto_non_rt_etl_pipeline_dag.png)
+
+### Docker Compose
+```commandline
+docker login -u "docker_username"
+docker-compose up --build --force-recreate --no-deps 
+```
+![image](./images/docker_compose_successful_run.png)
 
 ## TODOs:
 - Integration test the rest of the DAOs

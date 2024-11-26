@@ -1,12 +1,13 @@
-from typing import Sequence
-
-import pandas as pd
 import streamlit as st
+import os
+from typing import Sequence
+import pandas as pd
 from sqlalchemy import create_engine, Engine, TextClause, CursorResult, RowMapping, text
 from src.chain_stack_eth_block_etl_pipeline import trigger_etl_pipeline
 
+DATABASE_URL = os.getenv("POSTGRES_URL")
 
-engine: Engine = create_engine("postgresql://localhost:5432/chain_stack")
+engine: Engine = create_engine(DATABASE_URL)
 
 
 def toggle_button():
