@@ -43,11 +43,11 @@ def create_and_drop_db_and_tables(db_name: str, input_tables: list[Table]):
     finally:
         # Ensure all connections to the DB is closed
         # before dropping the database
-        test_db_engine.dispose()
+        test_db_engine.dispose() # type: ignore[union-attr]
         # TEARDOWN
         with default_db_engine.connect().execution_options(
             isolation_level="AUTOCOMMIT"
         ) as conn:
-            text_clause: TextClause = text(f"DROP DATABASE {db_name}")
-            conn.execute(text_clause)
+            drop_text_clause = text(f"DROP DATABASE {db_name}")
+            conn.execute(drop_text_clause)
         default_db_engine.dispose()

@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine, Engine, TextClause, CursorResult, RowMapping, text
 from src.chain_stack_eth_block_etl_pipeline import trigger_etl_pipeline
 
-DATABASE_URL = os.getenv("POSTGRES_URL")
+DATABASE_URL = os.getenv("POSTGRES_URL", "")
 
 engine: Engine = create_engine(DATABASE_URL)
 
@@ -17,8 +17,8 @@ def toggle_button():
 def query_database(query: str) -> pd.DataFrame:
     st.text(f"Running query: {query}")
     with engine.begin() as conn:
-        query: TextClause = text(query)
-        cursor_result: CursorResult = conn.execute(query)
+        query_text_clause: TextClause = text(query)
+        cursor_result: CursorResult = conn.execute(query_text_clause)
         sequence_of_rows: Sequence[RowMapping] = cursor_result.mappings().all()
     df = pd.DataFrame(sequence_of_rows)
     return df
@@ -47,7 +47,7 @@ with left_col:
     if st.session_state.button_state:
         with st.expander("Table: eth_blocks"):
             st.code(
-                f"""CREATE TABLE eth_blocks (
+                """CREATE TABLE eth_blocks (
         block_number VARCHAR PRIMARY KEY,
         id INTEGER NOT NULL,  -- This ID comes from QuickNode; do not generate it
         jsonrpc VARCHAR NOT NULL,
@@ -107,7 +107,7 @@ with left_col:
             )
         with st.expander("Table: eth_transaction_access_list"):
             st.code(
-                f"""CREATE TABLE eth_transaction_access_list (
+                """CREATE TABLE eth_transaction_access_list (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- Generate UUID using PostgreSQL function
         transaction_hash VARCHAR NOT NULL,  -- Foreign key to eth_transactions.hash
         address VARCHAR NOT NULL,
@@ -119,7 +119,7 @@ with left_col:
             )
         with st.expander("Table: eth_withdrawals"):
             st.code(
-                f"""CREATE TABLE eth_withdrawals (
+                """CREATE TABLE eth_withdrawals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- Generate UUID using PostgreSQL function
     block_number VARCHAR NOT NULL,  -- Foreign key to eth_blocks.block_number
     address VARCHAR NOT NULL,
@@ -133,7 +133,7 @@ with left_col:
             )
         with st.expander("Table: eth_block_import_status"):
             st.code(
-                f"""CREATE TABLE eth_block_import_status (
+                """CREATE TABLE eth_block_import_status (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- Generate UUID using PostgreSQL function
     block_number INTEGER NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL  -- Date of row insertion

@@ -22,12 +22,31 @@ asyncpg = "^0.29.0"
 greenlet = "^3.0.3"
 pytest-asyncio-cooperative = "^0.37.0"
 streamlit = "^1.39.0"
+boto3 = "^1.35.92"
 
 [tool.poetry.dev-dependencies]
 ruff = "^0.4.8"
 black = "^24.4.2"
 mypy = "^1.10.0"
 pytest = "^8.2.2"
+boto3-stubs = {extras = ["s3"], version = "^1.35.92"}
+pandas-stubs = "^2.2.3.241126"
+types-pymysql = "^1.1.0.20241103"
+types-pygments = "^2.18.0.20240506"
+types-cachetools = "^5.5.0.20240820"
+types-cffi = "^1.16.0.20241221"
+types-colorama = "^0.4.15.20240311"
+types-jmespath = "^1.0.2.20240106"
+types-jsonschema = "^4.23.0.20241208"
+types-protobuf = "^5.29.1.20241207"
+types-psycopg2 = "^2.9.21.20241019"
+types-pycurl = "^7.45.4.20241216"
+types-requests = "^2.32.0.20241016"
+types-retry = "^0.9.9.20241221"
+types-toml = "^0.10.8.20240310"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.14.1"
 
 [build-system]
 requires = ["poetry-core"]

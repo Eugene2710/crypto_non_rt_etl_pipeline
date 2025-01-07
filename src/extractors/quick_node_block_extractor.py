@@ -7,7 +7,7 @@ from src.quick_node.asynchronous.get_block_information import get_block_informat
 
 
 class QuickNodeBlockExtractor(BaseExtractor[QuickNodeEthBlockInformationResponse]):
-    async def extract(
+    async def extract( # type: ignore[override]
         self, start_block_number: int, end_block_number: int
     ) -> list[QuickNodeEthBlockInformationResponse]:
         """

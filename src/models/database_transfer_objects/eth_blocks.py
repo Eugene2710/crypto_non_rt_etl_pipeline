@@ -53,7 +53,7 @@ class EthBlockDTO(BaseModel):
     totalDifficulty: str = Field(serialization_alias="totaldifficulty")
     transactionsRoot: str = Field(serialization_alias="transactionsroot")
     withdrawalsRoot: str | None = Field(None, serialization_alias="withdrawalsroot")
-    created_at: datetime = Field(
+    created_at: datetime.datetime = Field(
         default_factory=datetime.datetime.utcnow, serialization_alias="created_at"
     )
     model_config = ConfigDict(arbitrary_types_allowed=True)

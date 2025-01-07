@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def get_block_information(block_number: str) -> ChainStackEthBlockInformationResponse:
-    url = os.getenv("CHAIN_STACK_URL")
+    url = os.getenv("CHAIN_STACK_URL", "")
     print(f"url: {url}")
     payload: str = json.dumps(
         {

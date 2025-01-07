@@ -27,7 +27,7 @@ load_dotenv()
 async def get_block_information(
     block_number: str,
 ) -> QuickNodeEthBlockInformationResponse:
-    url: str = os.getenv("QUICK_NODE_URL")
+    url: str = os.getenv("QUICK_NODE_URL", "")
     payload: str = json.dumps(
         {
             "method": "eth_getBlockByNumber",

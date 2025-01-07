@@ -20,7 +20,7 @@ dotenv.load_dotenv()
     jitter=(-0.01, 0.01),
 )
 async def get_latest_block_number() -> str:
-    url = os.getenv("CHAIN_STACK_URL")
+    url = os.getenv("CHAIN_STACK_URL", "")
     payload: str = json.dumps(
         {"method": "eth_blockNumber", "params": [], "id": 1, "jsonrpc": "2.0"}
     )

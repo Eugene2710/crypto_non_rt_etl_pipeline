@@ -10,7 +10,7 @@ load_dotenv()
 
 
 def get_blob_base_fee() -> dict[str, Any]:
-    url: str = os.getenv("QUICK_NODE_URL")
+    url: str = os.getenv("QUICK_NODE_URL", "")
     payload: str = json.dumps(
         {"method": "eth_blobBaseFee", "params": [], "id": 1, "jsonrpc": "2.0"}
     )

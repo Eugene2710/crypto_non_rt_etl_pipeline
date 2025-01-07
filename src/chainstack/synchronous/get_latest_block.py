@@ -9,7 +9,7 @@ load_dotenv()
 
 
 def get_latest_block_number() -> str:
-    url = os.getenv("CHAIN_STACK_URL")
+    url = os.getenv("CHAIN_STACK_URL", "")
     payload = json.dumps(
         {"method": "eth_blockNumber", "params": [], "id": 1, "jsonrpc": "2.0"}
     )

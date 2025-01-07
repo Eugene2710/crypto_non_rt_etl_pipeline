@@ -56,7 +56,7 @@ class QuickNodeEthBlockInformationResult(
                 "withdrawals": (
                     [
                         QuickNodeEthWithdrawal.model_validate(single_withdrawal)
-                        for single_withdrawal in input.get("withdrawals")
+                        for single_withdrawal in input.get("withdrawals", [])
                     ]
                     if "withdrawals" in input
                     else []

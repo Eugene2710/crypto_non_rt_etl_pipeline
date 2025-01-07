@@ -26,7 +26,7 @@ class EthTransactionAccessListDTO(BaseModel):
         input: QuickNodeEthAccessListItem | ChainStackEthAccessListItem,
     ) -> "EthTransactionAccessListDTO":
         return EthTransactionAccessListDTO(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             transaction_hash=transaction_hash,
             address=input.address,
             storageKeys=input.storageKeys,

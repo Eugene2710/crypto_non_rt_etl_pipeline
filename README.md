@@ -73,6 +73,38 @@ Refer to [this repository](https://github.com/Eugene2710/crypto_non_rt_etl_pipel
 
 ![image](./images/airflow_crypto_non_rt_etl_pipeline_dag.png)
 
+### Backfills with CSV files into S3
+
+The data pipeline supports backfill-ing data into the DB
+
+Upload the file under a S3 path, and the ETL pipeline will load it into the DB
+
+![s3_backfill_architecture_s3.png](images/s3_backfill_architecture_s3.png)
+
+### FAQs
+
+#### Q1: What if you don't have this feature:
+
+You will have to manually copy each CSV file into the database / table one by one
+
+But it has drawbacks:
+- You have to manually run the command once for every file
+- You need the user to have write permissions to the DB
+
+```sql
+COPY into my_table(field_1, field_2, field_3) VALUES (:field_1, :field_2, :field_3);
+```
+
+#### Q2: Why should we COPY large CSV files (100k rows and above) into a Temporary Table first, before inserting from the temporary table into the DB
+
+Reason 1: Write Optimization. Batch write background operations when inserting into the main table
+
+Inserting a row into a PG main table (with indexes) will trigger background tasks such as rearranging data (according to primary key and foreign key constraints + acquiring table locks), and generating write ahead logs
+
+When data is copied into the temporary table, it doesn't trigger these write background just yet.
+
+Then, when inserting from temporary table into the main table, it will batch these write background operations
+
 ### Docker Compose
 ```commandline
 docker login -u "docker_username"

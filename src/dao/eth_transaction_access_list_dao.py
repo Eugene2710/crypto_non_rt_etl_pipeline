@@ -55,7 +55,7 @@ class EthTransactionAccessListDAO:
                     id=single_row[0],
                     transaction_hash=single_row[1],
                     address=single_row[2],
-                    storagekeys=single_row[3],
+                    storageKeys=single_row[3],
                     created_at=single_row[4],
                 )
             )
@@ -91,7 +91,7 @@ class EthTransactionAccessListDAO:
                     "id": single_input.id,
                     "transaction_hash": single_input.transaction_hash,
                     "address": single_input.address,
-                    "storagekeys": single_input.storagekeys,
+                    "storagekeys": single_input.storageKeys,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input

@@ -34,9 +34,7 @@ from sqlalchemy import (
     insert,
     text,
     TextClause,
-    select,
     CursorResult,
-    Select,
     Row,
 )
 from database_management.tables import eth_block_import_status_table
@@ -84,8 +82,8 @@ def create_and_drop_db_and_tables(db_name: str):
         with default_db_engine.connect().execution_options(
             isolation_level="AUTOCOMMIT"
         ) as conn:
-            text_clause: TextClause = text(f"DROP DATABASE {db_name}")
-            conn.execute(text_clause)
+            drop_text_clause: TextClause = text(f"DROP DATABASE {db_name}")
+            conn.execute(drop_text_clause)
         default_db_engine.dispose()
 
 
@@ -125,10 +123,9 @@ def setup_test_read_latest_import_status(
 
 
 @pytest.fixture
-def setup_test_insert_import_status(
-    create_and_drop_db_and_tables
-):
+def setup_test_insert_import_status(create_and_drop_db_and_tables):
     yield
+
 
 class TestEthBlockImportStatusDAO:
     @pytest.mark.asyncio_cooperative

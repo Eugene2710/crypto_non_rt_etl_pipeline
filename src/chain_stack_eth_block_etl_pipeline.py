@@ -92,7 +92,9 @@ class ChainStackEthBlockETLPipeline:
         # Step 2: Fetch current latest block_number in quick node
         # IMPORTANT: THIS SINGLE LINE PROTECTS YOUR WALLET
         # Temporarily ingest block 0 to block 10
-        end_block_number: str = hex(start_block_number + 100)  # await get_latest_block_number()
+        end_block_number: str = hex(
+            start_block_number + 100
+        )  # await get_latest_block_number()
         end_block_number_int: int = int(end_block_number[2:], 16)
 
         for start in range(

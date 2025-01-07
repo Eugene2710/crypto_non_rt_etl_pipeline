@@ -14,7 +14,7 @@ load_dotenv()
 
 
 def get_block_information(block_number: str) -> QuickNodeEthBlockInformationResponse:
-    url: str = os.getenv("QUICK_NODE_URL")
+    url: str = os.getenv("QUICK_NODE_URL", "")
     print(f"url: {url}")
     payload: str = json.dumps(
         {
@@ -35,7 +35,7 @@ def get_block_information(block_number: str) -> QuickNodeEthBlockInformationResp
         file.write(pformat(response_dict))
 
     response_model: QuickNodeEthBlockInformationResponse = (
-        QuickNodeEthBlockInformationResponse.from_json(response_dict)
+        QuickNodeEthBlockInformationResponse.from_json(block_number, response_dict)
     )
     return response_model
 
