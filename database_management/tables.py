@@ -143,3 +143,15 @@ eth_block_import_status_table: Table = Table(
     Column("created_at", DateTime, nullable=False),  # date you insert the row,
     Index("block_number_index", "block_number", postgresql_using="btree"),
 )
+
+s3_import_status_table: Table = Table(
+    "s3_import_status",
+    metadata,
+    Column("data_source", String, primary_key=True),  # e.g. chainstack_eth_blocks
+    Column(
+        "file_modified_date", DateTime, primary_key=True
+    ),  # date at which file is modified in s3
+    Column(
+        "created_at", DateTime, nullable=False
+    ),  # date at which the file is created at
+)

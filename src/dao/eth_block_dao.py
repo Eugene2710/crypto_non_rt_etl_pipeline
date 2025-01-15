@@ -219,7 +219,7 @@ class EthBlockDAO:
         dbapi_pooled_conn = await conn.get_raw_connection()
         dbapi_conn = dbapi_pooled_conn.driver_connection
         try:
-            await dbapi_conn.copy_to_table( # type: ignore[union-attr]
+            await dbapi_conn.copy_to_table(  # type: ignore[union-attr]
                 temp_table.name, source=csv_buffer, format="csv", header=True
             )
         except SQLAlchemyError:
@@ -290,7 +290,9 @@ if __name__ == "__main__":
     load_dotenv()
     event_loop = asyncio.new_event_loop()
 
-    dao = EthBlockDAO(connection_string=os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", ""))
+    dao = EthBlockDAO(
+        connection_string=os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
+    )
 
     s3_explorer: S3Explorer = S3Explorer(
         bucket_name=os.getenv("AWS_S3_BUCKET", ""),
@@ -299,6 +301,8 @@ if __name__ == "__main__":
         secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""),
     )
 
-    for file_path in s3_explorer.list_files("chainstack/eth_blocks"):
-        bytes_io: io.BytesIO = s3_explorer.download_to_buffer(file_path)
+    for file_info in s3_explorer.list_files(
+        "chainstack/eth_blocks", last_modified_date=datetime.utcnow()
+    ):
+        bytes_io: io.BytesIO = s3_explorer.download_to_buffer(file_info.file_path)
         event_loop.run_until_complete(dao.insert_csv_to_main_table(bytes_io))

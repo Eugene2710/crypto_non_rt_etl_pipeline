@@ -1,11 +1,13 @@
 import io
 from typing import Generator
+from datetime import datetime, timezone
 import boto3
 from dotenv import load_dotenv
 import os
 from mypy_boto3_s3.client import S3Client
 from mypy_boto3_s3.paginator import ListObjectsV2Paginator
-from mypy_boto3_s3.type_defs import ListObjectsV2OutputTypeDef
+
+from src.models.file_info.file_info import FileInfo
 
 
 class S3Explorer:
@@ -39,17 +41,27 @@ class S3Explorer:
         buffer.seek(0)
         return buffer
 
-    def list_files(self, s3_path_prefix: str) -> Generator[str, None, None]:
+    def list_files(
+        self, s3_path_prefix: str, last_modified_date: datetime
+    ) -> Generator[FileInfo, None, None]:
         """
         list all files under a given s3 path prefix and return a generator of file paths
         """
+
         paginator: ListObjectsV2Paginator = self._client.get_paginator(
             "list_objects_v2"
         )
         for page in paginator.paginate(Bucket=self.bucket_name, Prefix=s3_path_prefix):
             if "Contents" in page:
                 for obj in page["Contents"]:
-                    yield obj["Key"]
+                    # convert s3's timezone-aware modified date to utc first, then remove the timezone
+                    converted_modified_date = (
+                        obj["LastModified"].astimezone(timezone.utc).replace(tzinfo=None)
+                    )
+                    if converted_modified_date>last_modified_date:
+                        yield FileInfo(
+                            file_path=obj["Key"], modified_date=converted_modified_date
+                        )
 
 
 if __name__ == "__main__":
@@ -65,12 +77,12 @@ if __name__ == "__main__":
         "eth_blocks_20250106.csv",
         "chainstack/eth_blocks/2025/01/06/eth_blocks_20250106.csv",
     )
-    files_to_read: Generator[str, None, None] = s3_explorer.list_files(
-        "chainstack/eth_blocks"
+    files_to_read: Generator[FileInfo, None, None] = s3_explorer.list_files(
+        "chainstack/eth_blocks", datetime(year=2025, month=1, day=7)
     )
 
-    for s3_file_path in files_to_read:
+    for file_info in files_to_read:
         # e.g s3_file_path = "chainstack/eth_blocks/2025/01/06/eth_blocks_20250106.csv"
-        csv_file_bytes_io: io.BytesIO = s3_explorer.download_to_buffer(s3_file_path)
+        csv_file_bytes_io: io.BytesIO = s3_explorer.download_to_buffer(file_info.file_path)
         file_bytes = csv_file_bytes_io.read()
         print(file_bytes)

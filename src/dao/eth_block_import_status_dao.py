@@ -1,8 +1,10 @@
 import asyncio
 import datetime
+import os
 import uuid
 
 import retry
+from dotenv import load_dotenv
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -99,7 +101,8 @@ class EthBlockImportStatusDAO:
 
 
 if __name__ == "__main__":
-    connection_string: str = "postgresql+asyncpg://localhost:5432/chain_stack"
+    load_dotenv()
+    connection_string: str = os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
     import_status_dao: EthBlockImportStatusDAO = EthBlockImportStatusDAO(
         connection_string
     )
