@@ -81,6 +81,10 @@ Upload the file under a S3 path, and the ETL pipeline will load it into the DB
 
 ![s3_backfill_architecture_s3.png](images/s3_backfill_architecture_s3.png)
 
+In the screenshot below, we can see a backfill file in S3. The ETL pipeline will read the file and ingest it into the database.
+![s3_minio_uploaded_csv.png](images/s3_minio_uploaded_csv.png)
+
+
 ### FAQs
 
 #### Q1: What if you don't have this feature:
