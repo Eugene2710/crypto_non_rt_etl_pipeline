@@ -2,9 +2,11 @@ from typing import Literal, Union
 from pydantic import BaseModel
 
 
-# symbol filter models
-# https://developers.binance.com/docs/binance-spot-api-docs/filters
 class BaseFilter(BaseModel):
+    """
+    Symbol filter models
+    - https://developers.binance.com/docs/binance-spot-api-docs/filters
+    """
     filterType: str
 
 
