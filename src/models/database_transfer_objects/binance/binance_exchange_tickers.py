@@ -20,17 +20,16 @@ class BinanceTickerMetadataDTO(BaseModel):
         # Use exchange-level serverTime for all symbols since symbol object does not have its own time
         # convert serverTime (in ms) to a datetime object
         server_time_dt: datetime = datetime.fromtimestamp(exchange_info.serverTime / 1000, tz=timezone.utc)
-        dtos: list["BinanceTickerMetadataDTO"] = []
-        for symbol_obj in exchange_info.symbols:
-            dto = BinanceTickerMetadataDTO(
+        dtos: list["BinanceTickerMetadataDTO"] = [
+            BinanceTickerMetadataDTO(
                 symbol=symbol_obj.symbol,
                 server_time=server_time_dt,
                 status=symbol_obj.status,
                 base_asset=symbol_obj.baseAsset,
                 quote_asset=symbol_obj.quoteAsset,
                 created_at=datetime.now(timezone.utc),
-            )
-            dtos.append(dto)
+            ) for symbol_obj in exchange_info.symbols
+        ]
         return dtos
 
 
