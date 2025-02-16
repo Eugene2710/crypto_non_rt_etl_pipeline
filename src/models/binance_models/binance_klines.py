@@ -21,7 +21,7 @@ class Klines(BaseModel):
     klines: list[Kline]
 
     @staticmethod
-    def from_json(raw_data: Any) -> "Klines":
+    def from_json(raw_data: list[list[str | int]]) -> "Klines":
         """
         Converts raw JSON (a list of lists) into a Klines object
         """
