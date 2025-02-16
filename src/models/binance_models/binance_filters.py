@@ -112,8 +112,10 @@ SymbolFilter = Union[
 ]
 
 
-# Exchange Filter Models
 class ExchangeMaxNumOrdersFilter(BaseFilter):
+    """
+    Exchange Filter Models
+    """
     filterType: Literal["EXCHANGE_MAX_NUM_ORDERS"] = "EXCHANGE_MAX_NUM_ORDERS"
     maxNumOrders: int
 
