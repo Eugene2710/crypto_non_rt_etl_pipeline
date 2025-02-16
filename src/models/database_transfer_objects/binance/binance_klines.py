@@ -20,7 +20,7 @@ class BinanceKlinePriceDTO(BaseModel):
     created_at: datetime
 
     @staticmethod
-    def from_serviec_kline(symbol: str, service_kline: Kline) -> "BinanceKlinePRiceDTO":
+    def from_service_kline(symbol: str, service_kline: Kline) -> "BinanceKlinePRiceDTO":
         """
         Converts a single service-level Kline object into a BinanceKlinePriceDTO
         """
