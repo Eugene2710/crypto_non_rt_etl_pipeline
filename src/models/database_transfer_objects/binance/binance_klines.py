@@ -20,7 +20,7 @@ class BinanceKlinePriceDTO(BaseModel):
     created_at: datetime
 
     @staticmethod
-    def from_service_kline(symbol: str, service_kline: Kline) -> "BinanceKlinePRiceDTO":
+    def from_service_kline(symbol: str, service_kline: Kline) -> "BinanceKlinePriceDTO":
         """
         Converts a single service-level Kline object into a BinanceKlinePriceDTO
         """
@@ -41,12 +41,12 @@ class BinanceKlinePriceDTO(BaseModel):
         )
 
     @staticmethod
-    def from_service_klines(symbol: str, service_klines: Klines) -> list["BinanceKlinesPriceDTO"]:
+    def from_service_klines(symbol: str, service_klines: Klines) -> list["BinanceKlinePriceDTO"]:
         """
         Converts a Klines object into a list of BinanceKlinesPriceDTO objects, one per kline
         """
         return [
-            BinanceKlinePriceDTO.from_serviec_kline(symbol, kline) for kline in service_klines.klines
+            BinanceKlinePriceDTO.from_service_kline(symbol, kline) for kline in service_klines.klines
         ]
 
 
