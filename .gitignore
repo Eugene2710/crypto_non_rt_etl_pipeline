@@ -3,4 +3,11 @@
 .env
 .pytest_cache/*
 .ruff_cache/*
-**/__pycache__/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS specific file
+.DS_Store
