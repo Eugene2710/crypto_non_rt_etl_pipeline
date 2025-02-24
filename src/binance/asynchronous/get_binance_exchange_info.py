@@ -1,11 +1,12 @@
 import asyncio
 from typing import Any
 import aiohttp
-from retry import retry
 from pprint import pprint
 
 from src.models.binance_models.binance_exchange_info import ExchangeInfo
-from src.models.database_transfer_objects.binance.binance_exchange_tickers import BinanceTickerMetadataDTO
+from src.models.database_transfer_objects.binance.binance_exchange_tickers import (
+    BinanceTickerMetadataDTO,
+)
 
 
 class BinanceExchangeInfoExtractor:
@@ -36,7 +37,9 @@ if __name__ == "__main__":
     # pprint(result)
     try:
         # Use run_until_complete to execute the async function synchronously.
-        exchange_info: ExchangeInfo = event_loop.run_until_complete(get_binance_exchange_info())
+        exchange_info: ExchangeInfo = event_loop.run_until_complete(
+            get_binance_exchange_info()
+        )
         # Convert the ExchangeInfo data into DTOs.
         dtos = BinanceTickerMetadataDTO.from_exchange_info(exchange_info)
 
@@ -45,6 +48,3 @@ if __name__ == "__main__":
             pprint(dto.model_dump())
     finally:
         event_loop.close()
-
-
-

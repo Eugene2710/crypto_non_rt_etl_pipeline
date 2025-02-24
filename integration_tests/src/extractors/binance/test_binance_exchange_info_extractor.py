@@ -2,9 +2,9 @@ import pytest
 import aiohttp
 from unittest.mock import patch, MagicMock, AsyncMock
 
-from src.binance.asynchronous.get_binance_exchange_info import BinanceExchangeInfoExtractor
 from src.extractors.binance_exchange_info_extractor import BinanceExchangeInfoExtractor
 from src.models.binance_models.binance_exchange_info import ExchangeInfo
+
 """
 To test:
 - Binance Exchange Info API
@@ -25,6 +25,7 @@ To test:
     Teardown: -
 """
 
+
 # GIVEN the connection to Binance Exchange API works
 class TestBinanceExchangeInfoAPI:
     @staticmethod
@@ -32,9 +33,10 @@ class TestBinanceExchangeInfoAPI:
     def binance_exchange_info_extractor() -> BinanceExchangeInfoExtractor:
         return BinanceExchangeInfoExtractor()
 
-
     @pytest.mark.asyncio
-    async def test_binance_exchange_info_api_responds(self, binance_exchange_info_extractor: BinanceExchangeInfoExtractor) -> None:
+    async def test_binance_exchange_info_api_responds(
+        self, binance_exchange_info_extractor: BinanceExchangeInfoExtractor
+    ) -> None:
         """
         Purpose:
         1. To test if extractor return error response for non-200 status
@@ -60,14 +62,16 @@ class TestBinanceExchangeInfoAPI:
 
 
 # THEN the extracted results should be of correct data types
-class BinanceExtractedResults:
+class TestBinanceExchangeInfoExtractedResults:
     @staticmethod
     @pytest.fixture
     def binance_exchange_info_extractor() -> BinanceExchangeInfoExtractor:
         return BinanceExchangeInfoExtractor()
 
     @pytest.mark.asyncio
-    async def test_exchange_info_api_returns_data(self, binance_exchange_info_extractor: BinanceExchangeInfoExtractor) -> None:
+    async def test_exchange_info_api_returns_data(
+        self, binance_exchange_info_extractor: BinanceExchangeInfoExtractor
+    ) -> None:
         """
         Purpose:
         1. To test if exchange info returns something
@@ -77,7 +81,9 @@ class BinanceExtractedResults:
         """
         # GIVEN the extractor extract results
         # WHEN the Binance Exchange Info API is working
-        exchange_info: ExchangeInfo = await binance_exchange_info_extractor.extract("SOLUSD")
+        exchange_info: ExchangeInfo = await binance_exchange_info_extractor.extract(
+            "SOLBTC"
+        )
         # THEN the returned response should not be None, should include "symbols" in the response,
         # symbols should be of type list, symbol should be the same as the input string/param and of type str
         assert exchange_info is not None
@@ -85,8 +91,6 @@ class BinanceExtractedResults:
         assert isinstance(exchange_info.symbols, list)
         # this check that returned symbol is of the right type, str, and also returns the same string
         for symbol_obj in exchange_info.symbols:
-            assert symbol_obj.symbol == "SOLUSD" # edit this according to the input symbol str
-
-
-
-
+            assert (
+                symbol_obj.symbol == "SOLBTC"
+            )  # edit this according to the input symbol str

@@ -1,5 +1,5 @@
-from typing import Any, Optional
-from pydantic import BaseModel, ConfigDict
+from typing import Optional
+from pydantic import BaseModel
 from src.models.binance_models.binance_rate_limit import RateLimit
 from src.models.binance_models.binance_filters import SymbolFilter, ExchangeFilter
 from pprint import pprint
@@ -56,20 +56,17 @@ if __name__ == "__main__":
                 "rateLimitType": "REQUEST_WEIGHT",
                 "interval": "MINUTE",
                 "intervalNum": 1,
-                "limit": 6000
+                "limit": 6000,
             },
             {
                 "rateLimitType": "ORDERS",
                 "interval": "SECOND",
                 "intervalNum": 1,
-                "limit": 10
-            }
+                "limit": 10,
+            },
         ],
         "exchangeFilters": [
-            {
-                "filterType": "EXCHANGE_MAX_NUM_ORDERS",
-                "maxNumOrders": 1000
-            }
+            {"filterType": "EXCHANGE_MAX_NUM_ORDERS", "maxNumOrders": 1000}
         ],
         "symbols": [
             {
@@ -95,15 +92,10 @@ if __name__ == "__main__":
                 "permissions": [],
                 "permissionSets": [["SPOT"]],
                 "defaultSelfTradePreventionMode": "NONE",
-                "allowedSelfTradePreventionModes": ["NONE"]
+                "allowedSelfTradePreventionModes": ["NONE"],
             }
         ],
-        "sors": [
-            {
-                "baseAsset": "BTC",
-                "symbols": ["BTCUSDT", "BTCUSDC"]
-            }
-        ]
+        "sors": [{"baseAsset": "BTC", "symbols": ["BTCUSDT", "BTCUSDC"]}],
     }
 
     # Parse the JSON into an ExchangeInfo object
