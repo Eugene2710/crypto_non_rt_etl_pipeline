@@ -61,6 +61,8 @@ binance_klines_prices_table = Table(
     Column("quote_asset_volume", Numeric(precision=38, scale=18), nullable=False),
     Column("number of trades", Integer, nullable=False),
     Column("taker_buy_base_asset_vol", Numeric(precision=38, scale=18), nullable=False),
-    Column("taker_buy_quote_asset_vol", Numeric(precision=38, scale=18), nullable=False),
-    Column("created_at", DateTime, nullable=False, default=now())
+    Column(
+        "taker_buy_quote_asset_vol", Numeric(precision=38, scale=18), nullable=False
+    ),
+    Column("created_at", DateTime, nullable=False, default=now()),
 )

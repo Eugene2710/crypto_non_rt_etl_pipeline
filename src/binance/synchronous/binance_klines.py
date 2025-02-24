@@ -29,5 +29,11 @@ def fetch_spot_klines(symbol, interval, limit=500, start_time=None, end_time=Non
         return None
 
 
-data = fetch_spot_klines(symbol="ETHBTC", interval="1s", limit=500, start_time=datetime(2025, 2, 10), end_time=datetime(2025, 2, 11))
+data = fetch_spot_klines(
+    symbol="ETHBTC",
+    interval="1s",
+    limit=500,
+    start_time=datetime(2025, 2, 10),
+    end_time=datetime(2025, 2, 11),
+)
 pprint(data)

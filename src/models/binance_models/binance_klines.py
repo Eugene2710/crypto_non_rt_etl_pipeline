@@ -1,8 +1,8 @@
-from pydantic import BaseModel, validator
-from typing import Any
+from pydantic import BaseModel
 
 
 class Kline(BaseModel):
+    symbol: str
     open_time: int  # e.g. 1499040000000
     open_price: str  # e.g. "0.01634790"
     high_price: str  # e.g. "0.80000000"
@@ -16,17 +16,36 @@ class Kline(BaseModel):
     taker_buy_quote_asset_volume: str  # e.g. "28.46694368"
     ignore: str  # e.g. "0" (unused field)
 
+    @staticmethod
+    def create_kline(symbol: str, data: list[str | int]) -> "Kline":
+        return Kline(
+            symbol=symbol,
+            open_time=data[0],
+            open_price=data[1],
+            high_price=data[2],
+            low_price=data[3],
+            close_price=data[4],
+            volume=data[5],
+            close_time=data[6],
+            quote_asset_volume=data[7],
+            number_of_trades=data[8],
+            taker_buy_base_asset_volume=data[9],
+            taker_buy_quote_asset_volume=data[10],
+            ignore=data[11],
+        )
+
 
 class Klines(BaseModel):
     klines: list[Kline]
 
     @staticmethod
-    def from_json(raw_data: list[list[str | int]]) -> "Klines":
+    def from_json(symbol: str, raw_data: list[list[str | int]]) -> "Klines":
         """
         Converts raw JSON (a list of lists) into a Klines object
         """
         parsed_klines = [
             Kline(
+                symbol=symbol,
                 open_time=item[0],
                 open_price=item[1],
                 high_price=item[2],
@@ -60,7 +79,7 @@ if __name__ == "__main__":
             308,
             "1756.87402397",
             "28.46694368",
-            "0"
+            "0",
         ]
     ]
 
