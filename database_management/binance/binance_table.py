@@ -66,3 +66,23 @@ binance_klines_prices_table = Table(
     ),
     Column("created_at", DateTime, nullable=False, default=now()),
 )
+
+"""
+CREATE TABLE IF NOT EXISTS s3_import_status(
+    data_source STRING NOT NULL,
+    file_modified_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL
+    PRIMARY KEY (data_source, file_modified_date)
+)
+"""
+
+s3_import_status_table: Table = Table(
+    "s3_import_status",
+    metadata,
+    Column("data_source", String, primary_key=True), # e.g. binance_klines
+    Column("file_modified_date", DateTime, primary_key=True), # date at which file was modified
+    Column("created_at", DateTime, nullable=False) # date at which file was created
+)
+
+
+

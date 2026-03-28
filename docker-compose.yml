@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: chain_stack
+      POSTGRES_DB: binance
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -25,7 +25,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      POSTGRES_URL: postgresql://postgres:password@postgres:5432/chain_stack
+      POSTGRES_URL: postgresql://postgres:password@postgres:5432/binance
     networks:
       - app_network
 
@@ -38,12 +38,29 @@ services:
       migrations:
         condition: service_completed_successfully
     environment:
-      POSTGRES_URL: postgresql://postgres:password@postgres:5432/chain_stack
-      CHAIN_STACK_PG_CONNECTION_STRING: postgresql+asyncpg://postgres:password@postgres:5432/chain_stack
+      POSTGRES_URL: postgresql://postgres:password@postgres:5432/binance
+      CHAIN_STACK_PG_CONNECTION_STRING: postgresql+asyncpg://postgres:password@postgres:5432/binance
       PYTHONPATH: /app
+    networks:
+      - app_network
+
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
     networks:
       - app_network
 
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  minio_data:
