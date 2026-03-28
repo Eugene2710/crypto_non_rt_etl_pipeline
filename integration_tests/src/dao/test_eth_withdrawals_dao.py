@@ -12,7 +12,7 @@ from sqlalchemy import (
 from src.dao.eth_withdrawals_dao import EthWithdrawalDAO
 from src.models.database_transfer_objects.eth_blocks import EthBlockDTO
 from src.models.database_transfer_objects.eth_withdrawals import EthWithdrawalDTO
-from database_management.tables import eth_withdrawals_table, eth_block_table
+from database_management.chainstack.tables import eth_withdrawals_table, eth_block_table
 
 
 @pytest.fixture

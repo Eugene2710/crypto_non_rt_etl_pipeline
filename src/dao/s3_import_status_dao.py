@@ -2,8 +2,8 @@ import os
 from asyncio import new_event_loop, AbstractEventLoop
 
 from dotenv import load_dotenv
-from retry import retry
-from sqlalchemy.exc import SQLAlchemyError, OperationalError, DisconnectionError
+from tenacity import retry, wait_fixed, stop_after_attempt
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncConnection
 from sqlalchemy import (
     Table,
@@ -18,7 +18,7 @@ from sqlalchemy import (
 from datetime import datetime
 import logging
 
-from database_management.tables import s3_import_status_table
+from database_management.chainstack.tables import s3_import_status_table
 from src.models.database_transfer_objects.s3_import_status import S3ImportStatusDTO
 from src.utils.logging_utils import setup_logging
 
@@ -32,11 +32,9 @@ class S3ImportStatusDAO:
         self._table: Table = s3_import_status_table
 
     @retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        jitter=(-0.01, 0.01),
-        backoff=1.5,
+        wait=wait_fixed(0.01), # ~10ms before attempts
+        stop=stop_after_attempt(5), # equivalent to 5 retries
+        reraise=True
     )
     async def insert_latest_import_status(
         self, import_status: S3ImportStatusDTO, conn: AsyncConnection
@@ -51,11 +49,9 @@ class S3ImportStatusDAO:
             raise
 
     @retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        jitter=(-0.01, 0.01),
-        backoff=1.5,
+        wait=wait_fixed(0.01),  # ~10ms before attempts
+        stop=stop_after_attempt(5),  # equivalent to 5 retries
+        reraise=True
     )
     async def read_latest_import_status(self, data_source) -> datetime | None:
         query_latest_import_status: Select = select(

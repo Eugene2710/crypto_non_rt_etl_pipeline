@@ -16,7 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError, OperationalError, DisconnectionError
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncConnection
 from src.models.database_transfer_objects.eth_blocks import EthBlockDTO
-from database_management.tables import eth_block_table, metadata
+from database_management.chainstack.tables import eth_block_table, metadata
 from src.file_explorer.s3_file_explorer import S3Explorer
 
 from datetime import datetime

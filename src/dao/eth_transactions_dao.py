@@ -143,7 +143,7 @@ class EthTransactionDAO:
 
 
 if __name__ == "__main__":
-    connection_string: str = "postgresql+asyncpg://localhost:5432/chain_stack"
+    connection_string: str = "postgresql+asyncpg://localhost:5432/chainstack"
     transaction_dao: EthTransactionDAO = EthTransactionDAO(connection_string)
     block_dao: EthBlockDAO = EthBlockDAO(connection_string)
 

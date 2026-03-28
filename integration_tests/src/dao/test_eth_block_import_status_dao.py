@@ -37,7 +37,7 @@ from sqlalchemy import (
     CursorResult,
     Row,
 )
-from database_management.tables import eth_block_import_status_table
+from database_management.chainstack.tables import eth_block_import_status_table
 from src.dao.eth_block_import_status_dao import EthBlockImportStatusDAO
 from src.models.database_transfer_objects.eth_block_import_status import (
     EthBlockImportStatusDTO,
