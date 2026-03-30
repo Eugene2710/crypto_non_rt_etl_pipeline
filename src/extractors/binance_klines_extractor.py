@@ -70,11 +70,11 @@ class BinanceKlinesExtractor:
 
 if __name__ == "__main__":
     event_loop: AbstractEventLoop = asyncio.new_event_loop()
-    symbol: str = "ETHBTC"
+    symbol: str = "BTCUSDC"
     interval: str = "1m"
     limit: int = 500
-    start_time: datetime = datetime(2025, 2, 10)
-    end_time: datetime = datetime(2025, 2, 11)
+    start_time: datetime = datetime(2026, 2, 10)
+    end_time: datetime = datetime(2026, 2, 11)
     response: Klines = event_loop.run_until_complete(
         BinanceKlinesExtractor.extract(
             symbol=symbol,
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             end_time=end_time,
         )
     )
-    # pprint(response)
-    with open("klines.json", "w", encoding="utf-8") as json_file:
-        json_str = response.model_dump_json(indent=2)
-        json_file.write(json_str)
+    print(response)
+    # with open("klines.json", "w", encoding="utf-8") as json_file:
+    #     json_str = response.model_dump_json(indent=2)
+    #     json_file.write(json_str)
