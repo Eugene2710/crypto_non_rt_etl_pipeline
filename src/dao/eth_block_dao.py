@@ -1,6 +1,6 @@
 import os
 
-import retry
+from tenacity import retry, wait_fixed, stop_after_attempt
 from sqlalchemy import (
     TextClause,
     text,
@@ -46,13 +46,10 @@ class EthBlockDAO:
         self._engine: AsyncEngine = create_async_engine(connection_string)
         self._table: Table = eth_block_table
 
-    @retry.retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        max_delay=0.3375,
-        backoff=1.5,
-        jitter=(-0.01, 0.01),
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
     )
     async def read_block_by_block_number(self, block_number: str) -> EthBlockDTO | None:
         """
@@ -107,13 +104,10 @@ class EthBlockDAO:
             )
             return eth_block_dto
 
-    @retry.retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        max_delay=0.3375,
-        backoff=1.5,
-        jitter=(-0.01, 0.01),
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
     )
     async def insert_blocks(
         self, async_connection: AsyncConnection, input: list[EthBlockDTO]
@@ -177,12 +171,10 @@ class EthBlockDAO:
             ],
         )
 
-    @retry.retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        jitter=(-0.01, 0.01),
-        backoff=1.5,
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
     )
     async def _create_temp_table(
         self, conn: AsyncConnection, temp_table: Table
@@ -200,12 +192,10 @@ class EthBlockDAO:
         except SQLAlchemyError:
             logger.exception("Unable to create temporary table")
 
-    @retry.retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        jitter=(-0.01, 0.01),
-        backoff=1.5,
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
     )
     async def _copy_to_temporary_table(
         self, conn: AsyncConnection, temp_table: Table, csv_buffer: io.BytesIO
@@ -226,12 +216,10 @@ class EthBlockDAO:
             logger.exception("Unable to copy to temporary table")
             raise
 
-    @retry.retry(
-        exceptions=(OperationalError, DisconnectionError),
-        tries=5,
-        delay=0.1,
-        jitter=(-0.01, 0.01),
-        backoff=1.5,
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
     )
     async def _insert_from_temp_to_main_table(
         self, conn: AsyncConnection, temp_table: Table
@@ -251,6 +239,11 @@ class EthBlockDAO:
             logger.exception("Unable to insert from temporary table to main table")
             raise
 
+    @retry(
+        wait=wait_fixed(0.01),
+        stop=stop_after_attempt(5),
+        reraise=True
+    )
     async def insert_csv_to_main_table(self, csv_buffer: io.BytesIO) -> None:
         """
         inserts a csv (io.BytesIO) into the main table
