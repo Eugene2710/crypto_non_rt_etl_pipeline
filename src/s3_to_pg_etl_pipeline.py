@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
 from src.dao.eth_block_dao import EthBlockDAO
+from src.dao.kline_binance_dao import KlineBinanceDAO
 from src.dao.s3_import_status_dao import S3ImportStatusDAO
 from src.file_explorer.s3_file_explorer import S3Explorer
 from src.models.database_transfer_objects.s3_import_status import S3ImportStatusDTO
@@ -29,14 +30,14 @@ class S3ETLPipeline:
         s3_explorer: S3Explorer,
         s3_prefix_path: str,
         connection_string: str,
-        block_dao: EthBlockDAO,
+        dao: EthBlockDAO | KlineBinanceDAO,
     ) -> None:
         self._s3_import_status_dao: S3ImportStatusDAO = s3_import_status_dao
         self._data_source: str = data_source
         self._s3_explorer: S3Explorer = s3_explorer
         self._s3_prefix_path: str = s3_prefix_path
         self._engine: AsyncEngine = create_async_engine(connection_string)
-        self._block_dao: EthBlockDAO = block_dao
+        self._dao: EthBlockDAO | KlineBinanceDAO = dao
 
     async def run(self) -> None:
         """
@@ -70,7 +71,7 @@ class S3ETLPipeline:
                 csv_bytes: io.BytesIO = self._s3_explorer.download_to_buffer(
                     file_info.file_path
                 )
-                await self._block_dao.insert_csv_to_main_table(csv_bytes)
+                await self._dao.insert_csv_to_main_table(csv_bytes)
                 current_batch_latest_modified_date = max(
                     current_batch_latest_modified_date, file_info.modified_date
                 )
@@ -96,19 +97,25 @@ def run():
         access_key_id=os.getenv("AWS_ACCESS_KEY_ID", ""),
         secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""),
     )
+    # s3_import_status_dao: S3ImportStatusDAO = S3ImportStatusDAO(
+    #     os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
+    # )
     s3_import_status_dao: S3ImportStatusDAO = S3ImportStatusDAO(
-        os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
+        os.getenv("BINANCE_PG_CONNECTION_STRING", "")
     )
-    eth_block_dao: EthBlockDAO = EthBlockDAO(
-        os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
+    # eth_block_dao: EthBlockDAO = EthBlockDAO(
+    #     os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", "")
+    # )
+    kline_binance_dao: KlineBinanceDAO = KlineBinanceDAO(
+        os.getenv("BINANCE_PG_CONNECTION_STRING", "")
     )
     s3_etl_pipeline: S3ETLPipeline = S3ETLPipeline(
         s3_import_status_dao=s3_import_status_dao,
-        data_source="chainstack_eth_blocks",
+        data_source="binance_klines",
         s3_explorer=s3_explorer,
-        s3_prefix_path="chainstack/eth_blocks",
+        s3_prefix_path="binance/klines",
         connection_string=os.getenv("CHAIN_STACK_PG_CONNECTION_STRING", ""),
-        block_dao=eth_block_dao,
+        dao=kline_binance_dao,
     )
     event_loop: AbstractEventLoop = new_event_loop()
     event_loop.run_until_complete(s3_etl_pipeline.run())
