@@ -59,7 +59,7 @@ binance_klines_prices_table = Table(
     Column("close_price", Numeric(precision=38, scale=18), nullable=False),
     Column("volume", Numeric(precision=38, scale=18), nullable=False),
     Column("quote_asset_volume", Numeric(precision=38, scale=18), nullable=False),
-    Column("number of trades", Integer, nullable=False),
+    Column("number_of_trades", Integer, nullable=False),
     Column("taker_buy_base_asset_vol", Numeric(precision=38, scale=18), nullable=False),
     Column(
         "taker_buy_quote_asset_vol", Numeric(precision=38, scale=18), nullable=False
