@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, Column, String, DateTime, Numeric, Integer
+from sqlalchemy import MetaData, Table, Column, String, DateTime, Numeric, Integer, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.functions import now
 
@@ -68,7 +68,7 @@ binance_klines_prices_table = Table(
 )
 
 """
-CREATE TABLE IF NOT EXISTS s3_import_status(
+CREATE TABLE IF NOT EXISTS provider_to_s3_import_status(
     data_source STRING NOT NULL,
     file_modified_date TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL
@@ -76,13 +76,19 @@ CREATE TABLE IF NOT EXISTS s3_import_status(
 )
 """
 
-s3_import_status_table: Table = Table(
-    "s3_import_status",
+provider_to_s3_import_status_table: Table = Table(
+    "provider_to_s3_import_status",
     metadata,
-    Column("data_source", String, primary_key=True), # e.g. binance_klines
+    Column("data_source", String, primary_key=True), # e.g. binance_klines aka table
     Column("file_modified_date", DateTime, primary_key=True), # date at which file was modified
     Column("created_at", DateTime, nullable=False) # date at which file was created
 )
 
-
-
+s3_to_db_import_status_table: Table = Table(
+    "s3_to_db_import_status",
+    metadata,
+    Column("data_source", String, primary_key=True), # aka table
+    Column("symbol", String, primary_key=True),
+    Column("kline_open_time", DateTime(timezone=False), primary_key=True),
+    Column("created_at", DateTime(timezone=False), nullable = False, server_default=func.now()),
+)
