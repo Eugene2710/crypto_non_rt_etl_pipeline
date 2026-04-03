@@ -7,11 +7,11 @@ import logging
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 from dotenv import load_dotenv
 
-from src.dao.s3_binance_import_status_dao import S3ImportStatusDAO
+from src.dao.binance_s3_import_status_dao import ProviderToS3ImportStatusDAO
 from src.models.binance_models.binance_klines import Klines
 from src.extractors.binance_klines_extractor import BinanceKlinesExtractor
 from src.file_explorer.s3_file_explorer import S3Explorer
-from src.models.database_transfer_objects.s3_import_status import S3ImportStatusDTO
+from src.models.database_transfer_objects.binance_to_s3_import_status import BinanceToS3ImportStatusDTO
 
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -21,12 +21,6 @@ BinanceExtractor
 Responsible for:
 - querying a data provider, binance_klines_extractor
 - save the raw data, in JSON, into S3
-"""
-
-"""
-TO_DOs
-Q: how do i save the data into S3
-A: refer to S3 file
 """
 
 
@@ -40,23 +34,23 @@ class BinanceToS3ETLPipeline:
 
     def __init__(
         self,
-        s3_import_status_dao: S3ImportStatusDAO,
+        provider_to_s3_import_status_dao: ProviderToS3ImportStatusDAO,
         data_source: str,
         extractor: BinanceKlinesExtractor,
         s3_explorer: S3Explorer,
         connection_string: str,
     ) -> None:
-        self._s3_import_status_dao: S3ImportStatusDAO = s3_import_status_dao
+        self._provider_to_s3_import_status_dao: ProviderToS3ImportStatusDAO = provider_to_s3_import_status_dao
         self._data_source: str = data_source
         self._extractor: BinanceKlinesExtractor = extractor
         self._s3_explorer: S3Explorer = s3_explorer
         self._engine: AsyncEngine = create_async_engine(connection_string)
 
-    async def run(self) -> None:
-        # step 1: get latest file modified date from s3_import_status table
-        latest_s3_modified_date: datetime | None = (
-            await self._s3_import_status_dao.read_latest_import_status(
-                data_source=self._data_source
+    async def run(self, symbol: str, kline_open_dt: datetime) -> None:
+        # step 1: get latest file modified date from provider_to_s3_import_status_table
+        latest_kline_modified_dt: datetime | None = (
+            await self._provider_to_s3_import_status_dao.read_latest_kline_import_status(
+                table=self._data_source
             )
         )
 
@@ -66,20 +60,20 @@ class BinanceToS3ETLPipeline:
         # end_date: current, or other specified date (make this customizable nonetheless)
         # TO_DO - start_time to include option of: time after latest_import_status, manual input
         # TO_DO - end_time to include option of: datetime.utcnow, manual input
-        start_time: datetime = datetime(2026, 3, 30) # TODO: put this as an input param
+        # start_time: datetime = datetime(2026, 3, 30) # TODO: put this as an input param
         # if start_time<=latest_s3_modified_date, data exists in s3 and extraction from binance is not necessary
         # break
-        if latest_s3_modified_date is not None and start_time <= latest_s3_modified_date:
+        if latest_kline_modified_dt is not None and kline_open_dt <= latest_kline_modified_dt:
             return
         end_time: datetime = datetime.utcnow()
         end_time_str: str = str(end_time)
         end_time_str_formatted: str = end_time_str.replace(" ", "_")
 
         klines: Klines = await self._extractor.extract(
-            symbol="BTCUSDC",
+            symbol=symbol,
             interval="1m",
             limit=500,
-            start_time=start_time,
+            start_time=kline_open_dt,
             end_time=end_time,
         )
         with open(
@@ -93,15 +87,16 @@ class BinanceToS3ETLPipeline:
             local_file_path=f"klines_{end_time_str_formatted}.json",
             s3_path=f"binance/klines/2026/{end_time_str_formatted}.json",
         )
-        # step 4: update s3_import_Status_table
+        # step 4: update provider_to_s3_import_status_table
         async with self._engine.begin() as conn:
-            updated_s3_import_status: S3ImportStatusDTO = S3ImportStatusDTO(
+            binance_to_s3_import_status: BinanceToS3ImportStatusDTO = BinanceToS3ImportStatusDTO(
                 data_source=self._data_source,
-                file_modified_date=max(end_time, datetime.utcnow()),
+                symbol=symbol,
+                kline_open_time=kline_open_dt,
                 created_at=datetime.utcnow()
             )
-            await self._s3_import_status_dao.insert_latest_import_status(
-                updated_s3_import_status, conn
+            await self._provider_to_s3_import_status_dao.insert_latest_import_status(
+                import_status=binance_to_s3_import_status
             )
 
 
@@ -117,19 +112,22 @@ def run():
         access_key_id=os.getenv("AWS_ACCESS_KEY_ID", ""),
         secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", ""),
     )
-    s3_import_status_dao: S3ImportStatusDAO = S3ImportStatusDAO(
+    provider_to_s3_import_status_dao: ProviderToS3ImportStatusDAO = ProviderToS3ImportStatusDAO(
         os.getenv("BINANCE_PG_CONNECTION_STRING", "")
     )
+
     binance_klines_extractor: BinanceKlinesExtractor = BinanceKlinesExtractor()
     binance_to_s3_etl_pipeline: BinanceToS3ETLPipeline = BinanceToS3ETLPipeline(
-        s3_import_status_dao=s3_import_status_dao,
-        data_source="binance_klines", #create this data source?
+        provider_to_s3_import_status_dao=provider_to_s3_import_status_dao,
+        data_source="binance_klines",
         extractor=binance_klines_extractor,
         s3_explorer=s3_explorer,
-        connection_string=os.getenv("BINANCE_PG_CONNECTION_STRING") #create new pg database
+        connection_string=os.getenv("BINANCE_PG_CONNECTION_STRING")
     )
     event_loop: AbstractEventLoop = new_event_loop()
-    event_loop.run_until_complete(binance_to_s3_etl_pipeline.run())
+    event_loop.run_until_complete(binance_to_s3_etl_pipeline.run(
+        symbol="BTCUSDC", kline_open_dt=datetime(2026, 3, 29)
+    ))
 
 
 if __name__ == "__main__":
