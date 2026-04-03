@@ -26,8 +26,8 @@ class BinanceKlinePriceDTO(BaseModel):
         """
         return BinanceKlinePriceDTO(
             symbol=symbol,
-            kline_open_time=datetime.fromtimestamp(service_kline.open_time/1000, tz=timezone.utc),
-            kline_close_time=datetime.fromtimestamp(service_kline.close_time/1000, tz=timezone.utc),
+            kline_open_time=datetime.fromtimestamp(service_kline.open_time/1000, tz=timezone.utc).replace(tzinfo=None),
+            kline_close_time=datetime.fromtimestamp(service_kline.close_time/1000, tz=timezone.utc).replace(tzinfo=None),
             open_price=Decimal(service_kline.open_price),
             high_price=Decimal(service_kline.high_price),
             low_price=Decimal(service_kline.low_price),
@@ -37,7 +37,7 @@ class BinanceKlinePriceDTO(BaseModel):
             number_of_trades=service_kline.number_of_trades,
             taker_buy_base_asset_vol=Decimal(service_kline.taker_buy_base_asset_volume),
             taker_buy_quote_asset_vol=Decimal(service_kline.taker_buy_quote_asset_volume),
-            created_at=datetime.now(timezone.utc)
+            created_at=datetime.now(timezone.utc).replace(tzinfo=None)
         )
 
     @staticmethod
