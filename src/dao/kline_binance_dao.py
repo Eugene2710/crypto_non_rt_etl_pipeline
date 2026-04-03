@@ -4,6 +4,7 @@ from sqlalchemy import (
     text,
     CursorResult,
     Row,
+    Table
 )
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncConnection
 from datetime import datetime
@@ -11,9 +12,12 @@ from dotenv import load_dotenv
 import logging
 import asyncio
 from tenacity import retry, wait_fixed, stop_after_attempt
+from io import BytesIO
 
+from src.models.binance_models.binance_klines import Klines
 from src.models.database_transfer_objects.binance.binance_klines import BinanceKlinePriceDTO
 from src.utils.logging_utils import setup_logging
+from database_management.binance.binance_table import binance_klines_prices_table
 
 logger = logging.getLogger(__name__)
 setup_logging(logger)
@@ -29,6 +33,8 @@ class KlineBinanceDAO:
     """
     def __init__(self, connection_string: str) -> None:
         self._engine: AsyncEngine = create_async_engine(connection_string)
+        self._table: Table = binance_klines_prices_table
+        self._temp_table_name: str | None = None
 
     @retry(
         wait=wait_fixed(0.01),
@@ -119,6 +125,30 @@ class KlineBinanceDAO:
         _: CursorResult = await async_connection.execute(
             insert_text_clause, rows_to_insert
         )
+
+    async def insert_json_to_main_table(self, json_buffer: BytesIO) -> None:
+        json_buffer.seek(0)
+        klines: Klines = Klines.model_validate_json(json_buffer.read())
+        if not klines.klines:
+            return
+        symbol: str = klines.klines[0].symbol
+        dtos: list[BinanceKlinePriceDTO] = BinanceKlinePriceDTO.from_service_klines(symbol, klines)
+        async with self._engine.begin() as conn:
+            await self.insert_kline(async_connection=conn, input=dtos)
+
+    # async def copy_klines_to_db(self, async_connection: AsyncConnection, data_buffer: BytesIO) -> None:
+    #     raw_adapt = await async_connection.get_raw_connection()
+    #     # ***WARNING***: private attribute; can break in future SQLAlchemy versions
+    #     actual_asyncpg_conn = raw_adapt._connection
+    #
+    #     data_buffer.seek(0)
+    #     columns = [col.name for col in self._table.columns]
+    #     await actual_asyncpg_conn.copy_to_table(
+    #         table_name=self._temp_table_name,
+    #         source=data_buffer,
+    #         columns=colu3mns,
+    #         format=
+    #     )
 
 
 if __name__ == "__main__":
