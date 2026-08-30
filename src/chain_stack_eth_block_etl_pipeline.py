@@ -205,7 +205,7 @@ class ChainStackEthBlockETLPipeline:
                 )
 
             batch_of_blocks_dto.append(eth_block_dto)
-            batch_of_transactions_dto.extend(batch_of_transactions_dto)
+            batch_of_transactions_dto.extend(transaction_dto_list)
             batch_of_withdrawals_dto.extend(withdrawal_dto_list)
             batch_of_transactions_access_list_items_dto.extend(
                 access_list_items_dto_list
