@@ -70,8 +70,8 @@ class EthWithdrawalDAO:
             return
         insert_block: str = (
             "INSERT into eth_withdrawals (id, block_number, address, amount, index, validatorIndex, created_at) values ("
-            ":id, :block_number, :address, :amount, :index, :validatorIndex, :created_at) NOT CONFLICT DO NOTHING "
-            "RETURNING id, block_id, address, amount, index, validatorIndex, created_at"
+            ":id, :block_number, :address, :amount, :index, :validatorIndex, :created_at) ON CONFLICT DO NOTHING "
+            "RETURNING id, block_number, address, amount, index, validatorIndex, created_at"
         )
         insert_text_clause: TextClause = text(insert_block)
 
@@ -84,7 +84,7 @@ class EthWithdrawalDAO:
                     "address": single_input.address,
                     "amount": single_input.amount,
                     "index": single_input.index,
-                    "validatorindex": single_input.validatorIndex,
+                    "validatorIndex": single_input.validatorIndex,
                     "created_at": single_input.created_at,
                 }
                 for single_input in input
