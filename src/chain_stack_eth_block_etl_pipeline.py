@@ -1,6 +1,5 @@
 import asyncio
 import os
-from asyncio import Future
 from pprint import pprint
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
@@ -10,6 +9,7 @@ from src.dao.eth_block_import_status_dao import EthBlockImportStatusDAO
 from src.dao.eth_transaction_access_list_dao import EthTransactionAccessListDAO
 from src.dao.eth_transactions_dao import EthTransactionDAO
 from src.dao.eth_withdrawals_dao import EthWithdrawalDAO
+from src.chainstack.asynchronous.get_latest_block import get_latest_block_number
 from src.extractors.chain_stack_block_extractor import ChainStackBlockExtractor
 from src.models.chain_stack_models.eth_blocks import (
     ChainStackEthBlockInformationResponse,
@@ -86,24 +86,38 @@ class ChainStackEthBlockETLPipeline:
                 block_number=0
             )
 
-        # TODO: temporarily make the ETL pipeline run for only block number 0 to 1 for testing (2 blocks)
-        # Remove this after testing
         start_block_number: int = latest_import_status.block_number + 1
-        # Step 2: Fetch current latest block_number in quick node
-        # IMPORTANT: THIS SINGLE LINE PROTECTS YOUR WALLET
-        # Temporarily ingest block 0 to block 10
-        end_block_number: str = hex(
-            start_block_number + 100
-        )  # await get_latest_block_number()
-        end_block_number_int: int = int(end_block_number[2:], 16)
+        # Step 2: Fetch current latest block_number in chainstack
+        chain_head_block_number: int = int(await get_latest_block_number(), 16)
+
+        if start_block_number > chain_head_block_number:
+            # already caught up with the chain; nothing to ingest this run
+            print(
+                f"run: watermark {latest_import_status.block_number} is at the chain "
+                f"head {chain_head_block_number}. Nothing to ingest."
+            )
+            return
+
+        # IMPORTANT: THIS CAP PROTECTS YOUR WALLET
+        # the chain head stops us requesting blocks that do not exist yet; this cap
+        # bounds how much a single run costs. Raise it to backfill faster.
+        blocks_per_run: int = 100
+        end_block_number_int: int = min(
+            start_block_number + blocks_per_run - 1, chain_head_block_number
+        )
 
         for start in range(
             start_block_number, end_block_number_int + 1, self._batch_size
         ):
-            # Step 3: Extract, and Load
-            await self.run_for_batch(
-                start, min(start + self._batch_size, end_block_number_int)
+            # run_for_batch takes both bounds as inclusive, so a batch of
+            # self._batch_size blocks ends at start + self._batch_size - 1.
+            # Without the -1, each batch re-fetches the first block of the next one,
+            # duplicating that block's withdrawals and access list rows.
+            batch_end_block_number: int = min(
+                start + self._batch_size - 1, end_block_number_int
             )
+            # Step 3: Extract, and Load
+            await self.run_for_batch(start, batch_end_block_number)
 
     async def run_for_batch(
         self, start_block_number: int, end_block_number: int
@@ -192,9 +206,12 @@ class ChainStackEthBlockETLPipeline:
                     [
                         EthTransactionAccessListDTO.from_eth_access_list_item(
                             transaction_hash=single_transaction.hash,
+                            item_index=item_index,
                             input=single_access_list_item,
                         )
-                        for single_access_list_item in single_transaction.accessList
+                        for item_index, single_access_list_item in enumerate(
+                            single_transaction.accessList
+                        )
                     ]
                     if single_transaction.accessList
                     else []
@@ -236,21 +253,19 @@ class ChainStackEthBlockETLPipeline:
             )
             print("insert_dtos_and_update_import_status:")
             pprint(eth_transaction_dtos)
-            # then, insert withdrawals and transactions in parallel
-            insert_transaction_future: Future = asyncio.ensure_future(
-                self._transaction_dao.insert_transactions(
-                    async_connection=async_connection, input=eth_transaction_dtos
-                )
+            # then, insert transactions and withdrawals sequentially
+            # the two tables are independent of each other, but they share a single
+            # AsyncConnection, and a connection permits only one operation in flight;
+            # gathering them interleaves at the execute() await and raises.
+            # A second connection is not the answer either: that would be a second
+            # transaction, breaking the all-or-nothing guarantee the import status
+            # update below depends on.
+            await self._transaction_dao.insert_transactions(
+                async_connection=async_connection, input=eth_transaction_dtos
             )
-            insert_withdrawal_future: Future = asyncio.ensure_future(
-                self._withdrawal_dao.insert_withdrawals(
-                    async_connection=async_connection, input=eth_withdrawal_dtos
-                )
+            await self._withdrawal_dao.insert_withdrawals(
+                async_connection=async_connection, input=eth_withdrawal_dtos
             )
-            insert_both_transaction_and_withdrawal_future: Future = asyncio.gather(
-                insert_transaction_future, insert_withdrawal_future
-            )
-            await insert_both_transaction_and_withdrawal_future
             # then, insert transaction_access_list, it has a foreign key constraint to transactions, and can only be done after transactions are inserted
             await self._transaction_access_list_dao.insert_transaction_access_list(
                 async_connection=async_connection,
