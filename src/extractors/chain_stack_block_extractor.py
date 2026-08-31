@@ -11,6 +11,22 @@ from asyncio import AbstractEventLoop, new_event_loop
 
 
 class ChainStackBlockExtractor:
+    # each block is a separate HTTP request on its own session, so these genuinely
+    # run in parallel. Left unbounded, a batch fires one request per block at once,
+    # which a rate-limited RPC endpoint will start rejecting under a real backfill.
+    DEFAULT_MAX_CONCURRENT_REQUESTS: int = 10
+
+    def __init__(
+        self, max_concurrent_requests: int = DEFAULT_MAX_CONCURRENT_REQUESTS
+    ) -> None:
+        self._max_concurrent_requests: int = max_concurrent_requests
+
+    async def _get_block_information_with_limit(
+        self, semaphore: asyncio.Semaphore, block_number: str
+    ) -> ChainStackEthBlockInformationResponse:
+        async with semaphore:
+            return await get_block_information(block_number)
+
     async def extract(
         self, start_block_number: int, end_block_number: int
     ) -> list[ChainStackEthBlockInformationResponse]:
@@ -19,13 +35,19 @@ class ChainStackBlockExtractor:
 
         100 - 1 + 1 = 100 queries
 
+        At most self._max_concurrent_requests are in flight at a time.
+
         Await for all blocks to return, then return
         """
-        for curr_block_number in range(start_block_number, end_block_number + 1):
-            print(hex(curr_block_number))
+        # created per call so the semaphore always belongs to the running event loop
+        semaphore: asyncio.Semaphore = asyncio.Semaphore(self._max_concurrent_requests)
 
         async_futures: list[Future[ChainStackEthBlockInformationResponse]] = [
-            asyncio.ensure_future(get_block_information(hex(curr_block_number)))
+            asyncio.ensure_future(
+                self._get_block_information_with_limit(
+                    semaphore, hex(curr_block_number)
+                )
+            )
             for curr_block_number in range(start_block_number, end_block_number + 1)
         ]
 
