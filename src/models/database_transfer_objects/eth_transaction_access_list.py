@@ -15,6 +15,9 @@ class EthTransactionAccessListDTO(BaseModel):
 
     id: str
     transaction_hash: str
+    # position of this entry in the transaction's accessList array; part of the
+    # natural key, since EIP-2930 permits the same address to appear more than once
+    item_index: int
     address: str
     storageKeys: list[str]
     created_at: datetime.datetime
@@ -23,11 +26,13 @@ class EthTransactionAccessListDTO(BaseModel):
     @staticmethod
     def from_eth_access_list_item(
         transaction_hash: str,
+        item_index: int,
         input: QuickNodeEthAccessListItem | ChainStackEthAccessListItem,
     ) -> "EthTransactionAccessListDTO":
         return EthTransactionAccessListDTO(
             id=str(uuid.uuid4()),
             transaction_hash=transaction_hash,
+            item_index=item_index,
             address=input.address,
             storageKeys=input.storageKeys,
             created_at=datetime.datetime.utcnow(),
