@@ -1,6 +1,12 @@
-import retry
 from sqlalchemy import TextClause, text, CursorResult, Row
 from sqlalchemy.exc import SQLAlchemyError
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+    wait_random,
+)
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncConnection
 from src.models.database_transfer_objects.eth_withdrawals import EthWithdrawalDTO
 
@@ -19,13 +25,12 @@ class EthWithdrawalDAO:
     def __init__(self, connection_string: str) -> None:
         self._engine: AsyncEngine = create_async_engine(connection_string)
 
-    @retry.retry(
-        exceptions=SQLAlchemyError,
-        tries=5,
-        delay=0.1,
-        max_delay=0.3375,
-        backoff=1.5,
-        jitter=(-0.01, 0.01),
+    @retry(
+        retry=retry_if_exception_type(SQLAlchemyError),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=0.1, exp_base=1.5, max=0.3375)
+        + wait_random(-0.01, 0.01),
+        reraise=True,
     )
     async def read_withdrawal_by_id(self, id: str) -> EthWithdrawalDTO | None:
         query_withdrawal_by_id: str = (
@@ -54,13 +59,12 @@ class EthWithdrawalDAO:
             )
             return eth_withdrawal_dto
 
-    @retry.retry(
-        exceptions=SQLAlchemyError,
-        tries=5,
-        delay=0.1,
-        max_delay=0.3375,
-        backoff=1.5,
-        jitter=(-0.01, 0.01),
+    @retry(
+        retry=retry_if_exception_type(SQLAlchemyError),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=0.1, exp_base=1.5, max=0.3375)
+        + wait_random(-0.01, 0.01),
+        reraise=True,
     )
     async def insert_withdrawals(
         self, async_connection: AsyncConnection, input: list[EthWithdrawalDTO]
@@ -70,8 +74,10 @@ class EthWithdrawalDAO:
             return
         insert_block: str = (
             "INSERT into eth_withdrawals (id, block_number, address, amount, index, validatorIndex, created_at) values ("
-            ":id, :block_number, :address, :amount, :index, :validatorIndex, :created_at) ON CONFLICT DO NOTHING "
-            "RETURNING id, block_number, address, amount, index, validatorIndex, created_at"
+            ":id, :block_number, :address, :amount, :index, :validatorIndex, :created_at) "
+            # conflict target is the natural key, not the uuid4 primary key: a re-run
+            # mints a fresh id, so an untargeted ON CONFLICT would never fire
+            "ON CONFLICT (block_number, index) DO NOTHING"
         )
         insert_text_clause: TextClause = text(insert_block)
 
