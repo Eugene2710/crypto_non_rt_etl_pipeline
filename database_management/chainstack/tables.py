@@ -10,6 +10,7 @@ from sqlalchemy import (
     UUID,
     Integer,
     Index,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -106,9 +107,21 @@ eth_transaction_access_list_table: Table = Table(
         ),
         nullable=False,
     ),
+    # position of this entry in the transaction's accessList array.
+    # EIP-2930 does not deduplicate access lists, so the same address may legitimately
+    # appear more than once in one transaction; the position is what makes an entry
+    # uniquely identifiable, and it is also what lets us reconstruct the original order.
+    Column("item_index", Integer, nullable=False),
     Column("address", String, nullable=False),
     Column("storagekeys", ARRAY(String), nullable=False),
     Column("created_at", DateTime, nullable=False),  # date you insert the row
+    # natural key: re-ingesting a block must not duplicate rows. The uuid4 primary key
+    # cannot do this, as a re-run mints a fresh id and never conflicts.
+    UniqueConstraint(
+        "transaction_hash",
+        "item_index",
+        name="transaction_access_list_transaction_hash_item_index_uq",
+    ),
 )
 
 # Withdrawals has a many to one relationship with blocks
@@ -129,6 +142,11 @@ eth_withdrawals_table: Table = Table(
     Column("index", String, nullable=False),
     Column("validatorindex", String, nullable=False),
     Column("created_at", DateTime, nullable=False),  # date you insert the row
+    # natural key: re-ingesting a block must not duplicate rows. The uuid4 primary key
+    # cannot do this, as a re-run mints a fresh id and never conflicts.
+    UniqueConstraint(
+        "block_number", "index", name="withdrawals_block_number_index_uq"
+    ),
 )
 
 # Q: Postgres has BTree and Hash index. Why did we use BTree?
