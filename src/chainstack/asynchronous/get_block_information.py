@@ -6,7 +6,13 @@ from dotenv import load_dotenv
 import json
 import os
 
-from retry import retry
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+    wait_random,
+)
 
 from src.chainstack.exceptions.chainstack_client_error import ChainStackClientError
 from src.models.chain_stack_models.eth_blocks import (
@@ -17,12 +23,11 @@ load_dotenv()
 
 
 @retry(
-    exceptions=(aiohttp.ClientError, ChainStackClientError),
-    tries=5,
-    delay=0.1,
-    max_delay=0.3375,
-    backoff=1.5,
-    jitter=(-0.01, 0.01),
+    retry=retry_if_exception_type((aiohttp.ClientError, ChainStackClientError)),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=0.1, exp_base=1.5, max=0.3375)
+    + wait_random(-0.01, 0.01),
+    reraise=True,
 )
 async def get_block_information(
     block_number: str,
