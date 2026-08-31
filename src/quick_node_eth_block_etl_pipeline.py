@@ -186,9 +186,12 @@ class QuickNodeEthBlockETLPipeline:
                     [
                         EthTransactionAccessListDTO.from_eth_access_list_item(
                             transaction_hash=single_transaction.hash,
+                            item_index=item_index,
                             input=single_access_list_item,
                         )
-                        for single_access_list_item in single_transaction.accessList
+                        for item_index, single_access_list_item in enumerate(
+                            single_transaction.accessList
+                        )
                     ]
                     if single_transaction.accessList
                     else []
